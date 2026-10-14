@@ -1456,6 +1456,23 @@ html[data-tema="final-fantasy"] side-navigation-content expandable-section:has(a
   padding: 3px 4px !important;
 }
 
+/* Gemini 4 (2026-10) dropped Search chats from the top group, so New chat
+   sits alone in its box. Two things followed. The active row's ring ran
+   just inside the box's own frame and read as a double border, so in this
+   box the active row keeps its wash but drops the ring and glow. And
+   div.top-action-list carries an 8px left margin of its own, which put this
+   box 8px right of (and 8px narrower than) the boxes below; it is cancelled
+   while the sidebar is open (the collapsed rail's icons live in the same
+   container and keep it). */
+html[data-tema="final-fantasy"] bard-sidenav:not(.collapsed) side-navigation-content div.top-action-list {
+  margin-left: 0 !important;
+}
+html[data-tema="final-fantasy"] side-navigation-content div.top-action-list a.gem-nav-list-item.is-active,
+html[data-tema="final-fantasy"] side-navigation-content div.top-action-list a.gem-nav-list-item[aria-current="page"] {
+  animation: none !important;
+  box-shadow: none !important;
+}
+
 /* Every sidebar row wears the pixel face — the rows re-declare Google Sans
    on their own spans (gds-* classes), so the family is stated on the
    descendants too. Icon ligatures opt out or they would spell their names. */

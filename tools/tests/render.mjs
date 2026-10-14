@@ -1016,15 +1016,23 @@ const GEM4_PAGE = (attrs, head) => `<!doctype html>
      (2026-10-13): it lives on the same ::before as the theme's hand. */
   .mat-mdc-list-item-interactive::before { top: 0; left: 0; right: 0; bottom: 0; position: absolute; content: ""; opacity: 0; }
   .mdc-list-item:not(.mdc-list-item--selected):focus::before { position: absolute; top: 0; left: 0; width: 100%; height: 100%; content: ""; }
-  side-navigation-content { display: block; width: 260px; }
+  side-navigation-content { display: block; width: 280px; }
   gem-nav-list-item a { display: flex; height: 32px; align-items: center; }
+  mat-nav-list { display: block; }
+  /* Gemini 4's own margin on the top group's container. */
+  .top-action-list { margin-left: 8px; }
 </style>
 ${head}
 </head>
 <body class="dark-theme">
-<side-navigation-content><gem-nav-list-item>
-  <a class="mat-mdc-list-item mdc-list-item mat-mdc-list-item-interactive gem-nav-list-item" href="/app" id="newchat"><span>New chat</span></a>
-</gem-nav-list-item></side-navigation-content>
+<bard-sidenav><side-navigation-content>
+  <div class="top-action-list"><mat-nav-list id="topbox"><gem-nav-list-item>
+    <a class="mat-mdc-list-item mdc-list-item mat-mdc-list-item-interactive gem-nav-list-item is-active" aria-current="page" href="/app" id="newchat"><span>New chat</span></a>
+  </gem-nav-list-item></mat-nav-list></div>
+  <mat-nav-list class="top-action-list-scrollable" id="listbox"><gem-nav-list-item>
+    <a class="mat-mdc-list-item mdc-list-item gem-nav-list-item" href="/images"><span>Images</span></a>
+  </gem-nav-list-item></mat-nav-list>
+</side-navigation-content></bard-sidenav>
 <main>
   <div id="zero"><input-container><div class="input-area-container is-zero-state" style="border-radius:28px">
     <input-area-v2><div class="input-area"><rich-textarea><div class="ql-editor"></div></rich-textarea></div></input-area-v2>
@@ -1067,6 +1075,9 @@ window.addEventListener("load", () => {
     selected: cs(".gem-segmented-button-selected .gem-segmented-button-action span").color,
     other: cs("gem-segmented-button:not(.gem-segmented-button-selected) .gem-segmented-button-action span").color,
     rowFocused: document.activeElement === document.getElementById("newchat"),
+    topLeft: Math.round(document.getElementById("topbox").getBoundingClientRect().left),
+    listLeft: Math.round(document.getElementById("listbox").getBoundingClientRect().left),
+    activeRing: cs("#newchat").boxShadow,
     hand: (() => { const h = cs("#newchat", "::before"); return [h.width, h.height, h.left, h.top].join(" "); })(),
   };
   document.title = "PROBE:" + JSON.stringify(out);
@@ -1098,6 +1109,8 @@ g4check("gem4 slider", g4.slider.startsWith("linear-gradient"), `the active-tab 
 g4check("gem4 tab font", /Silkscreen/.test(g4.tabFont), `tab labels in the pixel face (${g4.tabFont})`);
 g4check("gem4 row hand", g4.rowFocused && g4.hand === "20px 18px -4px 16px",
   `a clicked (focused) row keeps its small hand at the edge, not stretched by Material's state layer (${g4.hand})`);
+g4check("gem4 new chat box", g4.topLeft === g4.listLeft && g4.activeRing === "none",
+  `New chat's box lines up with the boxes below (${g4.topLeft} vs ${g4.listLeft}) and its active row adds no second ring (${g4.activeRing})`);
 g4check("gem4 tab colours", g4.selected === "rgb(36, 28, 4)" && g4.other === "rgb(219, 228, 255)",
   `dark on gold when selected (${g4.selected}), menu text otherwise (${g4.other})`);
 console.log(bad

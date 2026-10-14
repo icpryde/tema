@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Gemini: the New chat box sits flush with the boxes below it again (Gemini 4
+  wraps it in a container with an 8px margin of its own) and no longer shows
+  a double border: New chat is alone in that box now, so the active row's
+  ring ran just inside the box's frame. The active row keeps its wash.
+
 ## 1.0.0 — 2026-10-13
 
 The first release of Tema.
