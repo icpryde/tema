@@ -9,8 +9,9 @@
 - Claude: the account row's right-hand button (now "Get apps and
   extensions", "Send feedback" before it) wears the menu crystal again.
   The crystal follows the slot, not the label.
-- Claude: voice mode's microphone menu (the ⌄) no longer overlaps the voice
-  button. Claude tucks it 6px under, which drew the two chips over each other.
+- Claude: voice mode and its microphone menu (the ⌄) are one split control,
+  and now look like one: a single chip with two halves. Chipped separately,
+  the ⌄ (tucked 6px under by Claude) drew over the voice button.
 
 ## 1.0.0 — 2026-10-13
 

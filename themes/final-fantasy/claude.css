@@ -1012,12 +1012,32 @@ html[data-tema="final-fantasy"]
   color: var(--ff-gold) !important;
 }
 
-/* Voice mode and its microphone menu (the ⌄) are one split control: Claude
-   tucks the ⌄ 6px under the voice button, which as two separate chips drew
-   one over the other. Side by side instead, on the row's own gap. */
+/* Voice mode is one split control ([data-cds="SplitDropdownButton"]): the
+   voice half and its microphone menu (the ⌄), each in its own segment
+   wrapper with a divider between, the ⌄ tucked 6px under the voice half.
+   Chipped separately, the two drew over each other. The group is the chip
+   now, and its halves sit inside it as one control. */
 html[data-tema="final-fantasy"]
   div[class*="cursor-text"]:has([data-testid="chat-input"])
-  button[data-cds-ghost] + button[aria-haspopup="menu"][data-cds-ghost] {
+  [data-cds="SplitDropdownButton"] {
+  border: 1px solid rgba(255, 255, 255, 0.42) !important;
+  border-radius: 3px !important;
+  background: linear-gradient(180deg, rgba(84, 114, 214, 0.45), rgba(18, 30, 92, 0.45)) !important;
+  box-shadow: 0 2px 0 rgba(3, 6, 22, 0.5);
+  overflow: hidden;
+}
+html[data-tema="final-fantasy"]
+  div[class*="cursor-text"]:has([data-testid="chat-input"])
+  [data-cds="SplitDropdownButton"]:hover {
+  border-color: var(--ff-gold) !important;
+}
+html[data-tema="final-fantasy"]
+  div[class*="cursor-text"]:has([data-testid="chat-input"])
+  [data-cds="SplitDropdownButton"] button[data-cds="Button"]:not([aria-label*="Send" i]) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   margin-inline-start: 0 !important;
 }
 

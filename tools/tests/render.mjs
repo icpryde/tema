@@ -164,13 +164,19 @@ const BODY = `
     <a data-cds="Button" data-cds-icon-only data-cds-ghost href="/downloads" aria-label="Get apps and extensions" id="footeraux" style="display:inline-block;width:32px;height:32px"><span class="cds-btn-squish"></span><span data-cds="Icon">apps</span></a>
   </span></div></div>
   <div class="cursor-text composer"><div data-testid="chat-input">Reply to Claude…</div>
-    <!-- Voice mode + its microphone menu: one split control, the ⌄ tucked
-         6px under the voice button (live markup, 2026-10-14). -->
+    <!-- Voice mode + its microphone menu: one SplitDropdownButton, each half
+         in its own segment wrapper with a divider between, the ⌄ tucked 6px
+         under the voice half (live markup, 2026-10-14). -->
     <div class="inline-flex gap-1" style="display:inline-flex;gap:4px;position:relative">
       <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-label="Dictate" style="width:32px;height:32px"></button>
-      <div class="contents" style="display:contents">
-        <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-label="Use voice mode" id="voicebtn" style="width:32px;height:32px"></button>
-        <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-haspopup="menu" aria-label="Microphone" id="micmenu" style="width:22px;height:32px;margin-inline-start:-6px"></button>
+      <div data-cds="SplitDropdownButton" role="group" aria-label="Use voice mode" id="voicesplit" style="display:flex">
+        <div data-cds-segment style="display:contents"><div style="display:contents">
+          <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-label="Use voice mode" id="voicebtn" style="width:32px;height:32px"></button>
+        </div></div>
+        <span style="display:block;width:1px;background:#555"></span>
+        <div data-cds-segment style="display:contents">
+          <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-haspopup="menu" aria-label="Microphone" id="micmenu" style="width:22px;height:32px;margin-inline-start:-6px"></button>
+        </div>
       </div>
     </div>
     <div role="radiogroup" data-cds="SegmentedControl" aria-label="Surface" data-size="sm" class="cds-seg">
@@ -282,6 +288,8 @@ const PROBES = JSON.stringify([
   ["footer icon",    "#footeraux > [data-cds=Icon]",                     null,      ["opacity"]],
   ["voice btn",      "#voicebtn",                                        null,      ["@offsetLeft", "@offsetWidth"]],
   ["mic menu",       "#micmenu",                                         null,      ["@offsetLeft"]],
+  ["voice chip",     "#voicesplit",                                      null,      ["borderTopWidth", "backgroundImage"]],
+  ["voice half",     "#voicebtn",                                        null,      ["borderTopWidth", "backgroundImage"]],
   ["code nav more",  '[data-frame-mode="code"] .contents > button:nth-of-type(4) .df-leading-slot', "::after", ["backgroundImage"]],
   ["code nav artifacts", '[data-frame-mode="code"] .contents > button:nth-of-type(2) .df-leading-slot', "::after", ["backgroundImage"]],
   ["chocobo",        ".ff-choco-a .ff-choco",                        null,      ["animationName", "backgroundSize", "transform"]],
@@ -423,6 +431,9 @@ const MUST_BE_STYLED = {
   "feedback crystal": ["transform", /^none$/],
   "footer crystal":  ["backgroundImage", /^img#/],
   "footer icon":     ["opacity", /^0$/],
+  // The split control is one chip: the group framed, its halves bare.
+  "voice chip":      ["backgroundImage", /linear-gradient/],
+  "voice half":      ["borderTopWidth", /^0px$/],
 };
 
 // Code-mode remap: More (#4) must NOT wear Scheduled's clock — the code rows
