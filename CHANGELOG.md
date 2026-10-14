@@ -6,6 +6,11 @@
   wraps it in a container with an 8px margin of its own) and no longer shows
   a double border: New chat is alone in that box now, so the active row's
   ring ran just inside the box's frame. The active row keeps its wash.
+- Claude: the account row's right-hand button (now "Get apps and
+  extensions", "Send feedback" before it) wears the menu crystal again.
+  The crystal follows the slot, not the label.
+- Claude: voice mode's microphone menu (the ⌄) no longer overlaps the voice
+  button. Claude tucks it 6px under, which drew the two chips over each other.
 
 ## 1.0.0 — 2026-10-13
 

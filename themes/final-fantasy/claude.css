@@ -1012,6 +1012,15 @@ html[data-tema="final-fantasy"]
   color: var(--ff-gold) !important;
 }
 
+/* Voice mode and its microphone menu (the ⌄) are one split control: Claude
+   tucks the ⌄ 6px under the voice button, which as two separate chips drew
+   one over the other. Side by side instead, on the row's own gap. */
+html[data-tema="final-fantasy"]
+  div[class*="cursor-text"]:has([data-testid="chat-input"])
+  button[data-cds-ghost] + button[aria-haspopup="menu"][data-cds-ghost] {
+  margin-inline-start: 0 !important;
+}
+
 /* Sidebar Home / Code switch as a JRPG segmented menu: the group is the
    window, the sliding indicator is the highlighted row, active label is gold.
 
@@ -1703,6 +1712,34 @@ html[data-tema="final-fantasy"] button[aria-label*="feedback" i]::after {
   height: calc(var(--ff-art-menu-crystal-h) * 0.5px);
   transform: none;              /* the hand's mirror flip does not apply */
   filter: drop-shadow(0 0 5px rgba(139, 234, 255, 0.5));
+}
+
+/* Since the 2026-10 build the account row's right-hand button is "Get apps
+   and extensions" (a link to /downloads), and the feedback button above is
+   gone, so the crystal went with it. It now keys on the slot, the row's
+   .df-footer-aux, whatever Claude puts there next: the stock icon is
+   hidden and the menu crystal stands in, at the same half scale. */
+html[data-tema="final-fantasy"] .df-footer-aux :is(a, button)[data-cds="Button"] {
+  position: relative;
+  background: transparent !important;
+}
+html[data-tema="final-fantasy"] .df-footer-aux :is(a, button)[data-cds="Button"] > * {
+  opacity: 0 !important;
+}
+html[data-tema="final-fantasy"] .df-footer-aux :is(a, button)[data-cds="Button"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: calc(var(--ff-art-menu-crystal-w) * 0.5px);
+  height: calc(var(--ff-art-menu-crystal-h) * 0.5px);
+  background: var(--ff-art-menu-crystal) center / contain no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 5px rgba(139, 234, 255, 0.5));
+  pointer-events: none;
+}
+html[data-tema="final-fantasy"] .df-footer-aux :is(a, button)[data-cds="Button"]:hover::after {
+  filter: drop-shadow(0 0 9px rgba(255, 215, 94, 0.9));
 }
 
 /* The user's turns get the user window, matching Home's message bubbles.

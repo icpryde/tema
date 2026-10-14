@@ -158,7 +158,21 @@ const BODY = `
       <button data-row-main-button><span class="df-leading-slot"></span><span>More</span></button>
     </div></div>
   </div></div>
+  <!-- The 2026-10 account row: its right-hand slot is "Get apps and
+       extensions" now, and wears the menu crystal. -->
+  <div class="df-footer-row"><div class="df-footer-aux"><span data-base-ui-tooltip-trigger>
+    <a data-cds="Button" data-cds-icon-only data-cds-ghost href="/downloads" aria-label="Get apps and extensions" id="footeraux" style="display:inline-block;width:32px;height:32px"><span class="cds-btn-squish"></span><span data-cds="Icon">apps</span></a>
+  </span></div></div>
   <div class="cursor-text composer"><div data-testid="chat-input">Reply to Claude…</div>
+    <!-- Voice mode + its microphone menu: one split control, the ⌄ tucked
+         6px under the voice button (live markup, 2026-10-14). -->
+    <div class="inline-flex gap-1" style="display:inline-flex;gap:4px;position:relative">
+      <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-label="Dictate" style="width:32px;height:32px"></button>
+      <div class="contents" style="display:contents">
+        <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-label="Use voice mode" id="voicebtn" style="width:32px;height:32px"></button>
+        <button data-cds="Button" data-cds-icon-only data-cds-ghost aria-haspopup="menu" aria-label="Microphone" id="micmenu" style="width:22px;height:32px;margin-inline-start:-6px"></button>
+      </div>
+    </div>
     <div role="radiogroup" data-cds="SegmentedControl" aria-label="Surface" data-size="sm" class="cds-seg">
       <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-clip rounded"><div class="cds-thumb"></div></div>
       <span role="radio" data-checked aria-checked="true"><span class="text-footnote">Chat</span></span>
@@ -264,6 +278,10 @@ const PROBES = JSON.stringify([
   ["code send hand",  '.epitaxy-prompt button[aria-label="Send"]',        "::after", ["left", "right", "width"]],
   ["code compact",   ".epitaxy-prompt.compact-fixture",                  null,      ["borderTopWidth", "animationName", "backgroundImage"]],
   ["feedback crystal", 'button[aria-label="Send feedback"]',              "::after", ["backgroundImage", "transform", "width"]],
+  ["footer crystal", "#footeraux",                                       "::after", ["backgroundImage", "width"]],
+  ["footer icon",    "#footeraux > [data-cds=Icon]",                     null,      ["opacity"]],
+  ["voice btn",      "#voicebtn",                                        null,      ["@offsetLeft", "@offsetWidth"]],
+  ["mic menu",       "#micmenu",                                         null,      ["@offsetLeft"]],
   ["code nav more",  '[data-frame-mode="code"] .contents > button:nth-of-type(4) .df-leading-slot', "::after", ["backgroundImage"]],
   ["code nav artifacts", '[data-frame-mode="code"] .contents > button:nth-of-type(2) .df-leading-slot', "::after", ["backgroundImage"]],
   ["chocobo",        ".ff-choco-a .ff-choco",                        null,      ["animationName", "backgroundSize", "transform"]],
@@ -403,6 +421,8 @@ const MUST_BE_STYLED = {
   // The crystal, not the hand: transform none (the hand mirrors), and width
   // from the crystal's own half-scale, not the cursor sprite's.
   "feedback crystal": ["transform", /^none$/],
+  "footer crystal":  ["backgroundImage", /^img#/],
+  "footer icon":     ["opacity", /^0$/],
 };
 
 // Code-mode remap: More (#4) must NOT wear Scheduled's clock — the code rows
@@ -419,6 +439,15 @@ const MUST_BE_STYLED = {
     bad++;
     console.log(`FAIL ${"code nav remap".padEnd(16)} code More icon is ${cm === "none" ? "missing" : "a Home icon"} — the positional mapping is leaking again`);
   }
+}
+
+// Voice mode's microphone menu sits beside the voice chip, not over it.
+{
+  const v = a.find(([l]) => l === "voice btn"), m = a.find(([l]) => l === "mic menu");
+  const vr = v && typeof v[1] === "object" ? +v[1]["@offsetLeft"] + +v[1]["@offsetWidth"] : NaN;
+  const ml = m && typeof m[1] === "object" ? +m[1]["@offsetLeft"] : NaN;
+  if (ml >= vr) console.log(`ok   ${"voice split".padEnd(16)} the ⌄ chip starts at ${ml}, clear of the voice chip's edge at ${vr}`);
+  else { bad++; console.log(`FAIL ${"voice split".padEnd(16)} the ⌄ chip starts at ${ml}, ${vr - ml}px over the voice chip`); }
 }
 
 // The tray override must NOT strip the icon font: those glyphs are Private Use
