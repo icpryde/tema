@@ -704,7 +704,11 @@ html[data-tema="final-fantasy"] model-response[data-tema-reply] .response-contai
   content: "";
   position: absolute;
   left: 10px;
-  top: 12px;
+  /* 12px down beside a reply of two lines or more. A one-line reply's window
+     is shorter than that leaves room for (the 32px crystal ran onto the
+     bottom border), so there it centres in the window, which centres it on
+     the line. */
+  top: clamp(4px, calc(50% - 16px), 12px);
   height: 32px;
   width: calc(32px * var(--ff-art-crystal-w) / var(--ff-art-crystal-h));
   background: var(--ff-art-crystal) center / contain no-repeat;
@@ -1258,8 +1262,39 @@ html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response:is([
 
 /* While a new turn is mid-run it owns the only Mog — the previous reply's
    parked one stands down so he never doubles. */
-html[data-tema="final-fantasy"]:has(model-response[data-tema-working]) model-response[data-tema-latest]:not([data-tema-working]) .response-container::after {
+html[data-tema="final-fantasy"]:has(model-response[data-tema-working], .conversation-container[data-tema-working]) model-response[data-tema-latest]:not([data-tema-working]) .response-container::after {
   content: none;
+}
+
+/* Until a new turn's reply mounts (a couple of seconds into the run), the
+   page signals stamp the turn itself, .conversation-container: Mog waits
+   under your message, where the reply window will open, rather than hopping
+   under the previous reply above it. Same spot as under a reply: the
+   window's left edge, worked out the same way on the XL grid. */
+html[data-tema="final-fantasy"] .conversation-container[data-tema-working] {
+  position: relative;
+}
+
+html[data-tema="final-fantasy"] .conversation-container[data-tema-working]::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: calc(100% + 6px);
+  width: calc(var(--ff-art-moogle-w) * 1.5px);
+  height: calc(var(--ff-art-moogle-h) * 1.5px);
+  background-image: var(--ff-art-moogle);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 2;
+  animation:
+    ff-moogle-frames 0.62s steps(1) infinite,
+    ff-moogle-hop 0.62s ease-in-out infinite;
+}
+
+html[data-tema="final-fantasy"] .enable-extended-and-xl-grid .conversation-container[data-tema-working]::after {
+  left: calc(max(0px, (100% - var(--bard-chat-window-content-width-default, 708px) - 58px) / 2) - 11px);
 }
 
 /* ----------------------------------------------------------- the sidebar */
@@ -1866,6 +1901,7 @@ html[data-tema="final-fantasy"] .ff-choco-c {
   html[data-tema="final-fantasy"] .ff-party-member,
   html[data-tema="final-fantasy"] .ff-shooting-star,
   html[data-tema="final-fantasy"] model-response[data-tema-working] .response-container::after,
+  html[data-tema="final-fantasy"] .conversation-container[data-tema-working]::after,
   html[data-tema="final-fantasy"] side-navigation-content a:not([href^="http"]):hover::before,
   html[data-tema="final-fantasy"] suggestion .suggestion-container:hover::before,
   html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item.is-active,

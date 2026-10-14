@@ -36,7 +36,6 @@
         "themes/final-fantasy/runtime.js"
       ],
       "css": [
-        "themes/final-fantasy/assets/fonts.css",
         "themes/final-fantasy/assets/sprites/party.css",
         "themes/final-fantasy/assets/sprites/party-strips.css",
         "themes/final-fantasy/assets/sprites/chocobo.css",
@@ -65,7 +64,6 @@
         "themes/final-fantasy/runtime.js"
       ],
       "css": [
-        "themes/final-fantasy/assets/fonts.css",
         "themes/final-fantasy/assets/sprites/party.css",
         "themes/final-fantasy/assets/sprites/party-strips.css",
         "themes/final-fantasy/assets/sprites/chocobo.css",
@@ -78,6 +76,7 @@
         "themes/final-fantasy/assets/sprites/shop-icons.css",
         "themes/final-fantasy/assets/sprites/silhouette.css",
         "themes/final-fantasy/assets/sprites/ambience.css",
+        "themes/final-fantasy/assets/fonts.css",
         "themes/final-fantasy/chatgpt.css"
       ]
     },
@@ -94,7 +93,6 @@
         "themes/final-fantasy/runtime.js"
       ],
       "css": [
-        "themes/final-fantasy/assets/fonts.css",
         "themes/final-fantasy/assets/sprites/party.css",
         "themes/final-fantasy/assets/sprites/party-strips.css",
         "themes/final-fantasy/assets/sprites/chocobo.css",
@@ -107,6 +105,7 @@
         "themes/final-fantasy/assets/sprites/shop-icons.css",
         "themes/final-fantasy/assets/sprites/silhouette.css",
         "themes/final-fantasy/assets/sprites/ambience.css",
+        "themes/final-fantasy/assets/fonts.css",
         "themes/final-fantasy/gemini.css"
       ]
     }

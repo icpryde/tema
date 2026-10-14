@@ -104,7 +104,6 @@ globalThis.TemaRegistry = Object.freeze({
         "html": "themes/final-fantasy/card.html",
         "css": "themes/final-fantasy/card.css",
         "styles": [
-          "themes/final-fantasy/assets/fonts.css",
           "themes/final-fantasy/assets/sprites/party.css",
           "themes/final-fantasy/assets/sprites/party-strips.css",
           "themes/final-fantasy/assets/sprites/chocobo.css",

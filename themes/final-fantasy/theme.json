@@ -7,11 +7,10 @@
 
   "sites": {
     "claude": "claude.css",
-    "chatgpt": "chatgpt.css",
-    "gemini": "gemini.css"
+    "chatgpt": ["assets/fonts.css", "chatgpt.css"],
+    "gemini": ["assets/fonts.css", "gemini.css"]
   },
   "styles": [
-    "assets/fonts.css",
     "assets/sprites/party.css",
     "assets/sprites/party-strips.css",
     "assets/sprites/chocobo.css",

@@ -131,8 +131,15 @@ export async function launch({ binary, extPath, args = [] }) {
       if (msg.method === "Runtime.consoleAPICalled" && msg.params.type === "error") {
         errors.push(msg.params.args.map((a) => a.value ?? a.description).join(" "));
       }
+      // Content Security Policy refusals never reach the console API; they
+      // arrive here, and the browser lists them on the extension's Errors
+      // page when the extension's own resources caused them.
+      if (msg.method === "Log.entryAdded" && msg.params.entry.source === "security") {
+        errors.push(msg.params.entry.text.slice(0, 160));
+      }
     });
     await cdp.send("Runtime.enable", {}, sessionId);
+    await cdp.send("Log.enable", {}, sessionId);
     await cdp.send("Page.enable", {}, sessionId);
     await cdp.send("Emulation.setDeviceMetricsOverride",
       { width, height, deviceScaleFactor: 2, mobile: false }, sessionId);

@@ -521,7 +521,11 @@ html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] >
   /* Inside the window's left gutter, clear of the 2px frame — at left:5/top:0
      it straddled the border and read as escaping the box. */
   left: 10px;
-  top: 12px;
+  /* 12px down beside a reply of two lines or more. A one-line reply's window
+     is shorter than that leaves room for (the 32px crystal ran onto the
+     bottom border), so there it centres in the window, which centres it on
+     the line. */
+  top: clamp(4px, calc(50% - 16px), 12px);
   /* Fixed height, width from the asset's own aspect — the drawn crystal is
      24x32 and the ripped one 8x16, and hardcoding either would squash the other. */
   height: 32px;

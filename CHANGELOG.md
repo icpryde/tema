@@ -22,7 +22,16 @@
   follow the new page too.
 - Gemini: Mog stands under the reply again. Gemini 4's wide layout centres
   each reply in a reading column while the box around it spans the screen,
-  and Mog had stayed at that box's far left edge.
+  and Mog had stayed at that box's far left edge. And for the couple of
+  seconds before Gemini starts a reply, he now waits under your new message
+  instead of hopping under the previous reply above it.
+- The crystal in a one-line reply sat low, running onto the window's
+  bottom border; in a window that short it now centres on the line. Longer
+  replies are unchanged.
+- No more errors on Tema's Errors page from claude.ai: the theme's fonts
+  were also embedded in a stylesheet, which claude.ai refuses (logging an
+  error each time). claude.ai gets them only the way it already used them,
+  loaded by the extension itself.
 
 ## 1.0.0 — 2026-10-13
 

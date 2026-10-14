@@ -491,7 +491,11 @@ html[data-tema="final-fantasy"] :is(section[data-tema-reply] div[data-message-au
   content: "";
   position: absolute;
   left: 10px;
-  top: 12px;
+  /* 12px down beside a reply of two lines or more. A one-line reply's window
+     is shorter than that leaves room for (the 32px crystal ran onto the
+     bottom border), so there it centres in the window, which centres it on
+     the line. */
+  top: clamp(4px, calc(50% - 16px), 12px);
   height: 32px;
   width: calc(32px * var(--ff-art-crystal-w) / var(--ff-art-crystal-h));
   background: var(--ff-art-crystal) center / contain no-repeat;

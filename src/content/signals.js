@@ -155,6 +155,15 @@
     // inside the history scroller at rest (pagination), so a document-wide
     // spinner test would read as busy forever.
     const last = replies[replies.length - 1] || null;
+    // Gemini mounts a new model-response a couple of seconds after the run
+    // starts (2.4s after the stop button, recorded live 2026-10-14), and
+    // stamping the newest model-response through that gap left Mog hopping
+    // under the PREVIOUS reply, above your new message. So while the newest
+    // turn (.conversation-container, your message and its reply) has no
+    // reply yet, the turn itself takes the stamp.
+    const turns = document.querySelectorAll(".conversation-container");
+    const lastTurn = turns[turns.length - 1] || null;
+    const target = lastTurn && !lastTurn.querySelector("model-response") ? lastTurn : last;
     const busy = !!(
       document.querySelector('button[aria-label*="stop" i], .stop-icon, [class*="stop-generating"]') ||
       document.querySelector(".thinking-banner, .skeleton-loader-container, .gem-shimmer-active") ||
@@ -164,7 +173,7 @@
         last.querySelector("mat-progress-spinner, mat-spinner")
       ))
     );
-    holdWorking(busy, last);
+    holdWorking(busy, target);
   }
 
   function markChatgpt() {

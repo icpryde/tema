@@ -36,10 +36,10 @@ const linksFor = (site) => [...THEME.styles, ...[].concat(THEME.sites[site])]
 // Every option on, so the optional rules are exercised too.
 const OPT = 'data-tema-opt="rich-text menu-sounds bottom-scenery"';
 
-async function probe(file) {
+async function probe(file, args = []) {
   const { stdout } = await run(CHROME, [
     "--headless", "--disable-gpu", "--allow-file-access-from-files",
-    "--virtual-time-budget=5000", "--dump-dom", "file://" + file,
+    "--virtual-time-budget=5000", ...args, "--dump-dom", "file://" + file,
   ], { maxBuffer: 200 * 1024 * 1024 });
   const m = /<title>PROBE:([\s\S]*?)<\/title>/.exec(stdout);
   if (!m) throw new Error("page never reported: " + file);
@@ -1126,6 +1126,8 @@ const GEM4_PAGE = (attrs, head) => `<!doctype html>
   .enable-extended-and-xl-grid { width: 1200px; }
   model-response, response-container, message-content, table-block, message-actions { display: block; }
   message-actions { height: 32px; }
+  /* Gemini's own markdown sets no paragraph margins. */
+  .markdown p { margin: 0; }
 </style>
 ${head}
 </head>
@@ -1197,6 +1199,12 @@ window.addEventListener("load", () => {
     listLeft: Math.round(document.getElementById("listbox").getBoundingClientRect().left),
     activeRing: cs("#newchat").boxShadow,
     hand: (() => { const h = cs("#newchat", "::before"); return [h.width, h.height, h.left, h.top].join(" "); })(),
+    // The crystal in a one-line window: [its top, the padding box's height].
+    crystal: (() => {
+      const win = document.querySelector("#xlreply .response-container-content");
+      const b = getComputedStyle(win, "::before"), c = getComputedStyle(win);
+      return [parseFloat(b.top), win.clientHeight, parseFloat(b.height)];
+    })(),
     // Where Mog stands against his reply's window: [window left, Mog left].
     mog: ["#xlreply", "#xltable"].map((id) => {
       const rc = document.querySelector(id + " .response-container");
@@ -1213,7 +1221,9 @@ window.addEventListener("load", () => {
 
 const M4 = rel("tools/tests/.render-gemini4.html");
 await writeFile(M4, GEM4_PAGE(`data-tema="${THEME_ID}" ${OPT}`, linksFor("gemini")), "utf8");
-const g4 = await probe(M4);
+// Wider than the theme's 900px narrow-screen cut, below which the crystal is
+// hidden and could not be measured.
+const g4 = await probe(M4, ["--window-size=1400,1000"]);
 await rm(M4, { force: true });
 console.log("");
 const g4check = (label, ok, detail) => {
@@ -1239,11 +1249,65 @@ g4check("gem4 new chat box", g4.topLeft === g4.listLeft && g4.activeRing === "no
   `New chat's box lines up with the boxes below (${g4.topLeft} vs ${g4.listLeft}) and its active row adds no second ring (${g4.activeRing})`);
 g4check("gem4 tab colours", g4.selected === "rgb(36, 28, 4)" && g4.other === "rgb(219, 228, 255)",
   `dark on gold when selected (${g4.selected}), menu text otherwise (${g4.other})`);
+{
+  const [top, inner, h] = g4.crystal;
+  g4check("gem4 crystal", Math.abs(top + h / 2 - inner / 2) <= 1 && top >= 4 && top + h <= inner,
+    `in a one-line window the crystal centres on the line, clear of the bottom border (top ${top}, ${h}px in ${inner}px)`);
+}
 for (const [i, kind] of [[0, "a column reply"], [1, "a full-width table reply"]]) {
   const [winLeft, mogLeft, content] = g4.mog[i];
   g4check(`gem4 mog ${i ? "table" : "column"}`, content === '""' && Math.abs(mogLeft - (winLeft + 2)) <= 1,
     `under ${kind} Mog stands at the window's left edge (Mog ${mogLeft}, window ${winLeft})`);
 }
+// A turn waiting for its reply (Gemini mounts the model-response a couple of
+// seconds into the run): the page signals stamp the turn itself, Mog hops
+// under it where the reply window will open, and the last reply's parked
+// Mog stands down.
+const WAIT_PAGE = (attrs, head) => `<!doctype html>
+<html lang="en" ${attrs}>
+<head><meta charset="utf-8">
+<style>
+  html, body { margin: 0; }
+  main { padding: 40px; }
+  .enable-extended-and-xl-grid { width: 1200px; }
+  model-response, response-container, message-content, message-actions, user-query, .conversation-container { display: block; }
+  message-actions { height: 32px; }
+  user-query { height: 48px; }
+</style>
+${head}
+</head>
+<body class="dark-theme"><main><div class="enable-extended-and-xl-grid"><infinite-scroller>
+  <div class="conversation-container"><user-query></user-query>
+    <model-response data-tema-reply="1" data-tema-latest id="settled"><div><response-container><div class="response-container">
+      <div><div class="response-container-content"><message-content><div class="markdown"><p>The last reply.</p></div></message-content></div></div>
+      <div><message-actions></message-actions></div>
+    </div></response-container></div></model-response>
+  </div>
+  <div class="conversation-container" data-tema-working id="waiting"><user-query></user-query></div>
+</infinite-scroller></div></main>
+<script>
+window.addEventListener("load", () => {
+  const turn = document.getElementById("waiting");
+  const a = getComputedStyle(turn, "::after");
+  const win = document.querySelector("#settled .response-container-content");
+  document.title = "PROBE:" + JSON.stringify({
+    content: a.content, anim: a.animationName,
+    mogLeft: Math.round(turn.getBoundingClientRect().left + parseFloat(a.left)),
+    winLeft: Math.round(win.getBoundingClientRect().left),
+    below: Math.round(parseFloat(a.top) - turn.getBoundingClientRect().height),
+    parked: getComputedStyle(document.querySelector("#settled .response-container"), "::after").content,
+  });
+});
+</script>
+</body></html>`;
+const MW = rel("tools/tests/.render-gemini-wait.html");
+await writeFile(MW, WAIT_PAGE(`data-tema="${THEME_ID}" ${OPT}`, linksFor("gemini")), "utf8");
+const gw = await probe(MW);
+await rm(MW, { force: true });
+g4check("gem4 waiting mog", gw.content === '""' && /ff-moogle-hop/.test(gw.anim) && Math.abs(gw.mogLeft - (gw.winLeft + 2)) <= 1 && gw.below === 6,
+  `a turn waiting for its reply has Mog hopping 6px under it at the window's edge (Mog ${gw.mogLeft}, window ${gw.winLeft}, ${gw.below}px below)`);
+g4check("gem4 one mog", gw.parked === "none", `the last reply's parked Mog stands down meanwhile (${gw.parked})`);
+
 console.log(bad
   ? `\n${bad} check(s) failed`
   : `\nrender clean — ${checks} properties read across ${probes} probes on three sites`);

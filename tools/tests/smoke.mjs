@@ -908,18 +908,40 @@ const GEMINI_PAGE = `<!doctype html>
     // Thinking lifecycle: reasoning streams into .thoughts-container while the
     // visible body is still empty — the reply must stay unstamped (no empty
     // framed window, no crystal) but MUST carry the working stamp so Mog hops.
+    // First the turn alone: the run has started (the stop button is up) but
+    // Gemini mounts the model-response a couple of seconds later (recorded
+    // live). The working stamp belongs on the new turn, not on the previous
+    // reply, which sits above your new message.
     const conv = document.createElement("div");
     conv.className = "conversation-container";
-    conv.innerHTML = "<user-query><span class='user-query-bubble-with-background'>q2</span></user-query>" +
-      "<model-response id='thinker'><div class='response-container'>" +
+    conv.innerHTML = "<user-query><span class='user-query-bubble-with-background'>q2</span></user-query>";
+    const stop = document.createElement("button");
+    stop.setAttribute("aria-label", "Stop response");
+    document.body.append(stop);
+    document.querySelector("infinite-scroller").append(conv);
+    await wait(600);
+    if (!conv.hasAttribute("data-tema-working")) {
+      window.__errors.push("gemini: a turn waiting for its reply was not stamped working — Mog hops under the previous reply");
+    }
+    if (document.getElementById("aturn").hasAttribute("data-tema-working")) {
+      window.__errors.push("gemini: the previous reply was stamped working while the new turn waited for its reply");
+    }
+
+    const mr = document.createElement("model-response");
+    mr.id = "thinker";
+    mr.innerHTML = "<div class='response-container'>" +
       "<div class='response-container-content'>" +
       "<model-thoughts><div class='thoughts-container'><div class='thoughts-content'>streamed reasoning…</div></div></model-thoughts>" +
       "<div class='skeleton-loader-container in-progress'></div>" +
       "<message-content><div class='markdown'></div></message-content>" +
-      "</div></div></model-response>";
-    document.querySelector("infinite-scroller").append(conv);
+      "</div></div>";
+    conv.append(mr);
+    stop.remove();
     await wait(600);
     const think = document.getElementById("thinker");
+    if (conv.hasAttribute("data-tema-working")) {
+      window.__errors.push("gemini: the turn kept the working stamp after its reply mounted");
+    }
     if (think.hasAttribute("data-tema-reply")) {
       window.__errors.push("gemini: thoughts-only reply was stamped data-tema-reply mid-thinking");
     }

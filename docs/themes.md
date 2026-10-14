@@ -36,10 +36,13 @@ Then:
 
   "sites": {                             // site id -> its stylesheet(s)
     "claude": "claude.css",
-    "chatgpt": "chatgpt.css",
-    "gemini": "gemini.css"
+    "chatgpt": ["assets/fonts.css", "chatgpt.css"],
+    "gemini": ["assets/fonts.css", "gemini.css"]
   },
-  "styles": ["assets/fonts.css"],        // loaded first on every site above
+  "styles": ["assets/sprites/art.css"],  // loaded first on every site above
+  "fonts": [                             // loaded by the engine on every site
+    { "family": "My Pixel Face", "src": "assets/fonts/MyFace.woff2" }
+  ],
   "script": "runtime.js",                // optional
   "signals": ["replies", "working"],     // optional, see below
   "files": ["assets/sounds/*.wav"],      // fetched at runtime (made web-accessible)
@@ -73,9 +76,16 @@ html[data-tema="my-theme"][data-tema-opt~="menu-sounds"] … { … }
 `data-tema` is the theme the site is wearing; `data-tema-opt` lists the
 options that are switched on. Switching themes in the popup is one attribute
 write, so there's no reload and no flash. Keep generated art in data URIs
-(as `--my-theme-*` custom properties) and fonts embedded the same way: a
-relative `url()` in injected CSS can resolve against the page, and an
-absolute `chrome-extension://` URL won't work in Safari.
+(as `--my-theme-*` custom properties): a relative `url()` in injected CSS
+can resolve against the page, and an absolute `chrome-extension://` URL
+won't work in Safari.
+
+Fonts go in `fonts`: the engine fetches each file itself and hands it to
+the page through the FontFace API, which works on every site. A stylesheet
+with the same faces embedded as `data:` URIs only helps where the page
+allows `data:` fonts, where it gives the face from the very first paint.
+claude.ai refuses them, and each refusal is listed on the extension's
+Errors page, so list such a stylesheet for the other sites only.
 
 Name every custom property, keyframe and class with a prefix of your own
 (Final Fantasy uses `ff-`), since all themes share the page.
