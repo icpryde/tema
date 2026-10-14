@@ -16,88 +16,16 @@
 // Skips (exit 0, with a note) off macOS, without the Xcode command line tools,
 // or on macOS older than 15.4 (no WKWebExtension).
 
-import { spawn, execFile } from "node:child_process";
-import { promisify } from "node:util";
-import { stat, readFile, mkdir } from "node:fs/promises";
-import { createInterface } from "node:readline";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { PAGES, startStandIns } from "../lib/stand-ins.mjs";
+import { available, startHarness } from "../lib/webkit.mjs";
 import { stage, STAGE } from "../safari.mjs";
 
-const run = promisify(execFile);
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-
-if (process.platform !== "darwin") {
-  console.log("skipped — the Safari build is tested with WebKit on macOS");
+const why = await available();
+if (why) {
+  console.log("skipped — " + why);
   process.exit(0);
-}
-const { stdout: osVersion } = await run("sw_vers", ["-productVersion"]);
-const [major, minor] = osVersion.trim().split(".").map(Number);
-if (major < 15 || (major === 15 && minor < 4)) {
-  console.log(`skipped — macOS ${osVersion.trim()} has no WKWebExtension (15.4 or later)`);
-  process.exit(0);
-}
-
-/* ------------------------------------------------------- the harness */
-
-const HARNESS_SRC = join(ROOT, "tools/safari/harness.swift");
-const HARNESS = join(ROOT, "safari/build/harness");
-
-/** The compiled harness, rebuilt when its source is newer. */
-async function harnessBinary() {
-  const src = await stat(HARNESS_SRC);
-  const bin = await stat(HARNESS).catch(() => null);
-  if (bin && bin.mtimeMs >= src.mtimeMs) return HARNESS;
-  await mkdir(dirname(HARNESS), { recursive: true });
-  try {
-    await run("xcrun", ["swiftc", "-O", "-o", HARNESS, HARNESS_SRC]);
-  } catch (err) {
-    if (err.code === "ENOENT" || /xcrun: error/.test(err.stderr || "")) {
-      console.log("skipped — no Swift compiler (install the Xcode command line tools)");
-      process.exit(0);
-    }
-    throw new Error("the harness didn't compile:\n" + (err.stderr || err.message));
-  }
-  return HARNESS;
-}
-
-/** Spawn the harness on `extDir`; returns { send, info, close }. */
-async function startHarness(extDir, proxyPort, { ask = false } = {}) {
-  const args = [extDir, "--proxy", String(proxyPort), ...(ask ? ["--ask"] : [])];
-  const child = spawn(await harnessBinary(), args, { stdio: ["pipe", "pipe", "pipe"] });
-  let stderr = "";
-  child.stderr.on("data", (d) => { stderr += d; });
-  const pending = new Map();
-  let ready;
-  const readyP = new Promise((r, reject) => {
-    ready = r;
-    child.on("exit", (code) => reject(new Error(`the harness exited (${code}) before it was ready\n${stderr.trim()}`)));
-  });
-  createInterface({ input: child.stdout }).on("line", (line) => {
-    let m;
-    try { m = JSON.parse(line); } catch { return; }
-    if (m.id === "ready") return ready(m);
-    const p = pending.get(m.id);
-    if (p) { pending.delete(m.id); p(m); }
-  });
-  const hello = await readyP;
-  if (!hello.ok) throw new Error("the harness couldn't load the extension: " + hello.error);
-  let n = 0;
-  const send = (cmd, ms = 30000) => new Promise((resolveSend, reject) => {
-    const id = ++n;
-    const timer = setTimeout(() => { pending.delete(id); reject(new Error(`no reply to ${cmd.cmd} in ${ms}ms`)); }, ms);
-    pending.set(id, (m) => { clearTimeout(timer); resolveSend(m); });
-    child.stdin.write(JSON.stringify({ id, ...cmd }) + "\n");
-  });
-  return {
-    info: hello.value,
-    send,
-    async close() {
-      await send({ cmd: "quit" }, 3000).catch(() => {});
-      child.kill();
-    },
-  };
 }
 
 /* ----------------------------------------------------------- the run */
@@ -124,7 +52,7 @@ check(manifest.content_scripts.every((e) => !e.css && /^src\/safari\//.test(e.js
   "the Safari manifest lists no CSS; each site's stylesheet loads first, as a script");
 
 const standIns = await startStandIns({ proxy: true });
-const harness = await startHarness(STAGE, standIns.proxyPort);
+const harness = await startHarness(STAGE, { proxyPort: standIns.proxyPort });
 
 try {
   const { send } = harness;
@@ -215,7 +143,7 @@ try {
 // fresh harness starts that way (--ask) and answers the prompts itself.
 // Ticking a site in the popup must ask for it; a refusal leaves a notice
 // with an Allow button; allowing it lets the theme in.
-const asking = await startHarness(STAGE, standIns.proxyPort, { ask: true });
+const asking = await startHarness(STAGE, { proxyPort: standIns.proxyPort, ask: true });
 try {
   const call = async (cmd) => {
     const r = await asking.send(cmd);

@@ -19,6 +19,7 @@ import { promisify } from "node:util";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findChrome } from "../lib/chrome.mjs";
+import { ENGINE, dumpTitle } from "../lib/webkit.mjs";
 
 const run = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -1308,11 +1309,14 @@ let failed = 0;
 async function drivePage(label, html, budget) {
   const file = resolve(ROOT, "tools/tests/.smoke.html");
   await writeFile(file, html, "utf8");
-  const { stdout } = await run(CHROME, [
-    "--headless", "--disable-gpu", "--allow-file-access-from-files",
-    "--virtual-time-budget=" + budget, "--dump-dom",
-    "file://" + file,
-  ], { maxBuffer: 40 * 1024 * 1024 });
+  // TEMA_ENGINE=webkit: the same drive in WebKit, Safari's engine, in real time.
+  const { stdout } = ENGINE === "webkit"
+    ? { stdout: await dumpTitle(file, "SMOKE:", { timeout: budget / 1000 + 30 }).catch((e) => String(e)) }
+    : await run(CHROME, [
+      "--headless", "--disable-gpu", "--allow-file-access-from-files",
+      "--virtual-time-budget=" + budget, "--dump-dom",
+      "file://" + file,
+    ], { maxBuffer: 40 * 1024 * 1024 });
   await rm(file, { force: true });
 
   const m = /<title>SMOKE:([\s\S]*?)<\/title>/.exec(stdout);

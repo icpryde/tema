@@ -23,6 +23,7 @@ import { promisify } from "node:util";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findChrome } from "../lib/chrome.mjs";
+import { ENGINE, dumpTitle } from "../lib/webkit.mjs";
 
 const run = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -395,11 +396,14 @@ async function render(name, html, budget) {
   const file = resolve(ROOT, "tools/tests/.wide-" + name + ".html");
   await writeFile(file, html, "utf8");
   try {
-    const { stdout } = await run(CHROME, [
-      "--headless", "--disable-gpu", "--allow-file-access-from-files",
-      "--window-size=1600,1000", "--virtual-time-budget=" + budget, "--dump-dom",
-      "file://" + file,
-    ], { maxBuffer: 40 * 1024 * 1024 });
+    // TEMA_ENGINE=webkit: the same page in WebKit, Safari's engine.
+    const { stdout } = ENGINE === "webkit"
+      ? { stdout: await dumpTitle(file, "WIDE:", { width: 1600, height: 1000, timeout: budget / 1000 + 20 }) }
+      : await run(CHROME, [
+        "--headless", "--disable-gpu", "--allow-file-access-from-files",
+        "--window-size=1600,1000", "--virtual-time-budget=" + budget, "--dump-dom",
+        "file://" + file,
+      ], { maxBuffer: 40 * 1024 * 1024 });
     const m = /<title>WIDE:([\s\S]*?)<\/title>/.exec(stdout);
     return m ? JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&")) : null;
   } finally {

@@ -19,6 +19,7 @@ import { promisify } from "node:util";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findChrome } from "../lib/chrome.mjs";
+import { ENGINE, dumpTitle } from "../lib/webkit.mjs";
 
 const run = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -36,7 +37,15 @@ const linksFor = (site) => [...THEME.styles, ...[].concat(THEME.sites[site])]
 // Every option on, so the optional rules are exercised too.
 const OPT = 'data-tema-opt="rich-text menu-sounds bottom-scenery"';
 
+// TEMA_ENGINE=webkit runs every page in WebKit (Safari's engine) instead,
+// at the same window size (tools/lib/webkit.mjs).
 async function probe(file, args = []) {
+  if (ENGINE === "webkit") {
+    const size = /--window-size=(\d+),(\d+)/.exec(args.join(" "));
+    const stdout = await dumpTitle(file, "PROBE:", { width: size ? +size[1] : 800, height: size ? +size[2] : 600 });
+    const m = /<title>PROBE:([\s\S]*?)<\/title>/.exec(stdout);
+    return JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">"));
+  }
   const { stdout } = await run(CHROME, [
     "--headless", "--disable-gpu", "--allow-file-access-from-files",
     "--virtual-time-budget=5000", ...args, "--dump-dom", "file://" + file,

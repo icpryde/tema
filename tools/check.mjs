@@ -20,6 +20,8 @@
 //   safari     the Safari build end to end in WebKit's extension runtime,
 //              Safari's per-site access included (macOS 15.4+ with the
 //              Xcode command line tools; skips without them)
+//   … webkit   smoke, glyph, wide and render again in WebKit, Safari's
+//              engine (TEMA_ENGINE=webkit; same requirements, same skip)
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -39,14 +41,19 @@ const SUITES = [
   ["package", ["tools/tests/package.mjs"]],
   ["extension", ["tools/tests/extension.mjs"]],
   ["safari", ["tools/tests/safari.mjs"]],
+  ["smoke · webkit", ["tools/tests/smoke.mjs"], { TEMA_ENGINE: "webkit" }],
+  ["glyph · webkit", ["tools/tests/glyph.mjs"], { TEMA_ENGINE: "webkit" }],
+  ["wide · webkit", ["tools/tests/wide.mjs"], { TEMA_ENGINE: "webkit" }],
+  ["render · webkit", ["tools/tests/render.mjs"], { TEMA_ENGINE: "webkit" }],
 ];
 
 let failed = 0;
-for (const [name, [script, ...args]] of SUITES) {
+for (const [name, [script, ...args], env] of SUITES) {
   process.stdout.write(`── ${name} ${"─".repeat(Math.max(0, 40 - name.length))}\n`);
   try {
     const { stdout } = await run(process.execPath, [resolve(ROOT, script), ...args], {
       cwd: ROOT,
+      env: { ...process.env, ...env },
       maxBuffer: 200 * 1024 * 1024,
     });
     console.log(stdout.trim());

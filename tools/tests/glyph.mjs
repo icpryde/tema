@@ -19,6 +19,7 @@ import { promisify } from "node:util";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findChrome } from "../lib/chrome.mjs";
+import { ENGINE, dumpTitle } from "../lib/webkit.mjs";
 
 const run = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -182,10 +183,13 @@ window.addEventListener("load", () => {
 const file = resolve(ROOT, "tools/tests/.glyph.html");
 await writeFile(file, page, "utf8");
 
-const { stdout } = await run(CHROME, [
-  "--headless", "--disable-gpu", "--allow-file-access-from-files",
-  "--virtual-time-budget=4000", "--dump-dom", "file://" + file,
-], { maxBuffer: 40 * 1024 * 1024 });
+// TEMA_ENGINE=webkit: the same page in WebKit, Safari's engine.
+const { stdout } = ENGINE === "webkit"
+  ? { stdout: await dumpTitle(file, "GLYPH:", { timeout: 20 }) }
+  : await run(CHROME, [
+    "--headless", "--disable-gpu", "--allow-file-access-from-files",
+    "--virtual-time-budget=4000", "--dump-dom", "file://" + file,
+  ], { maxBuffer: 40 * 1024 * 1024 });
 
 await rm(file, { force: true });
 

@@ -25,8 +25,9 @@
 //   {"id":2,"cmd":"popup","tab":"popup","path":"src/popup/popup.html"} an extension page
 //   {"id":3,"cmd":"eval","tab":"claude","js":"return document.title"}   async function body,
 //                                                                       run in the page's world
-//   {"id":4,"cmd":"probe","url":"file:///…","prefix":"PROBE:"}         load a file, wait for
-//                                                                       a title with that prefix
+//   {"id":4,"cmd":"probe","url":"file:///…","prefix":"PROBE:",         load a file in a plain
+//    "width":800,"height":600}                                          view, wait for a title
+//                                                                       with that prefix
 //   {"id":5,"cmd":"errors"}                                            the extension context's errors
 //   {"id":6,"cmd":"prompts"}                                           permission prompts seen so far
 //   {"id":7,"cmd":"answer","grant":false}                              how to answer the next prompts
@@ -96,6 +97,13 @@ final class Harness: NSObject, WKNavigationDelegate, WKWebExtensionControllerDel
     }
 
     func newView(_ configuration: WKWebViewConfiguration) -> WKWebView {
+        // Nobody ever sees these views, and WebKit throttles the timers of
+        // hidden pages and suspends their processes; pages under test have to
+        // run as if they were in front. (WebKit SPI, harmless where missing.)
+        let prefs = configuration.preferences
+        setPrivate(prefs, "_setHiddenPageDOMTimerThrottlingEnabled:", false)
+        setPrivate(prefs, "_setHiddenPageDOMTimerThrottlingAutoIncreases:", false)
+        setPrivate(prefs, "_setPageVisibilityBasedProcessSuppressionEnabled:", false)
         let view = WKWebView(frame: NSRect(x: 0, y: 0, width: 1280, height: 860), configuration: configuration)
         view.navigationDelegate = self
         view.uiDelegate = self
@@ -136,16 +144,30 @@ final class Harness: NSObject, WKNavigationDelegate, WKWebExtensionControllerDel
         return try await view.callAsyncJavaScript(js, arguments: [:], in: nil, contentWorld: .page)
     }
 
-    func probe(url: URL, prefix: String, timeout: Double) async throws -> String {
-        let view = newView(WKWebViewConfiguration())
+    func probe(url: URL, prefix: String, timeout: Double, size: NSSize) async throws -> String {
+        // The probe pages read their own file:// stylesheets' rules, which
+        // WebKit treats as cross-origin unless told otherwise (Chrome's
+        // --allow-file-access-from-files).
+        let configuration = WKWebViewConfiguration()
+        configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
+        let view = newView(configuration)
+        view.frame = NSRect(origin: .zero, size: size)
         defer { view.removeFromSuperview() }
         try await load(view, URLRequest(url: url))
         let end = Date().addingTimeInterval(timeout)
+        // Wait on WKWebView's title property, which runs no script: script run
+        // through evaluateJavaScript counts as a user gesture and would hand
+        // the page the user activation the pages under test must not have.
+        // That property is cut to about a thousand characters, so once the
+        // report is there it is read in full, once, through document.title.
         while Date() < end {
-            if let title = view.title, title.hasPrefix(prefix) { return title }
+            if let title = view.title, title.hasPrefix(prefix) {
+                return (try await view.evaluateJavaScript("document.title")) as? String ?? title
+            }
             try await Task.sleep(nanoseconds: 100_000_000)
         }
-        throw HarnessError("the page never reported (\(view.title ?? "no title"))")
+        throw HarnessError("the page never reported (\((view.title ?? "no title").prefix(200)))")
     }
 
     // MARK: navigation
@@ -173,6 +195,14 @@ final class Harness: NSObject, WKNavigationDelegate, WKWebExtensionControllerDel
         prompts.append(contentsOf: matchPatterns.map { $0.string })
         return (grantPrompts ? matchPatterns : [], nil)
     }
+}
+
+/// Call a private BOOL setter, if the object has it.
+func setPrivate(_ object: NSObject, _ selectorName: String, _ value: Bool) {
+    let selector = NSSelectorFromString(selectorName)
+    guard object.responds(to: selector) else { return }
+    typealias Setter = @convention(c) (AnyObject, Selector, Bool) -> Void
+    unsafeBitCast(object.method(for: selector), to: Setter.self)(object, selector, value)
 }
 
 struct HarnessError: Error, CustomStringConvertible {
@@ -238,7 +268,9 @@ func handle(_ line: String, _ harness: Harness) async {
         case "probe":
             let title = try await harness.probe(url: URL(string: cmd["url"] as? String ?? "")!,
                                                 prefix: cmd["prefix"] as? String ?? "",
-                                                timeout: cmd["timeout"] as? Double ?? 15)
+                                                timeout: cmd["timeout"] as? Double ?? 15,
+                                                size: NSSize(width: cmd["width"] as? Double ?? 800,
+                                                             height: cmd["height"] as? Double ?? 600))
             reply(["id": id, "ok": true, "value": title])
         case "errors":
             reply(["id": id, "ok": true, "value": harness.context.errors.map { String(describing: $0) }])
