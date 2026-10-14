@@ -1,13 +1,15 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — 2026-10-14
 
-- **Safari.** Tema runs in Safari, as a Mac app built from this repository:
-  `node tools/safari.mjs` builds it, signs it (with your Apple Development
-  certificate when there is one, so Safari keeps it switched on), installs
-  `/Applications/Tema.app` and registers it with Safari. The Safari build is
-  generated from the same files as the Chrome one; its stylesheets arrive
-  with the content scripts, since Safari hasn't reliably applied a
+- **Safari.** Tema runs in Safari, as a Mac app. Build it from this
+  repository with `node tools/safari.mjs`, which signs it with your Apple
+  Development certificate when you have one (so Safari keeps it switched
+  on), installs `/Applications/Tema.app` and registers it with Safari; or
+  take the ready-made app from the release, which is signed to run locally,
+  so Safari only loads it with "Allow unsigned extensions" on. The Safari
+  build is generated from the same files as the Chrome one; its stylesheets
+  arrive with the content scripts, since Safari hasn't reliably applied a
   manifest's CSS (docs/safari.md).
 - Safari asks, site by site, before an extension may run. Ticking a site in
   the popup now asks for it on the spot, and a site that wears a theme but

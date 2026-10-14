@@ -49,8 +49,9 @@ it reloads).
 
 ## Install (Safari)
 
-Safari takes extensions inside a Mac app, and Tema's is built from this
-repository, so you need a Mac with Xcode and Node.js.
+Safari takes extensions inside a Mac app. The best way is to build it
+yourself (a Mac with Xcode and Node.js), so it can be signed with your own
+Apple ID and Safari keeps it switched on:
 
 1. Clone this repository and, in it, run `node tools/safari.mjs`. It builds
    the app, installs it as `/Applications/Tema.app` and registers it with
@@ -68,6 +69,15 @@ signed with it and Safari keeps Tema switched on. Without one it is signed
 Settings → Allow unsigned extensions** is on, and that resets whenever Safari
 quits. **Updating:** pull, run `node tools/safari.mjs` again, reload your tabs.
 More in [docs/safari.md](docs/safari.md).
+
+**Or the ready-made app:** `Tema-for-Safari.zip` on the
+[latest release](https://github.com/icpryde/tema/releases/latest). It is signed
+to run locally, so: unzip it, move **Tema.app** to Applications and open it
+(the first time, macOS may need *System Settings → Privacy & Security → Open
+Anyway*); in Safari turn on **Develop → Developer Settings → Allow unsigned
+extensions**, then tick Tema in Settings → Extensions. Safari turns that
+setting off whenever it quits, so after each restart turn it on again and
+reopen Tema.app.
 
 ## What it can see
 
