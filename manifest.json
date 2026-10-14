@@ -1,0 +1,126 @@
+{
+  "manifest_version": 3,
+  "name": "Tema",
+  "version": "1.0.0",
+  "description": "Themes for Claude, ChatGPT and Gemini. Pick a theme, then tick the sites that wear it.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Tema",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "src/registry.js",
+        "src/settings.js",
+        "src/content/core.js",
+        "src/content/signals.js",
+        "themes/final-fantasy/runtime.js"
+      ],
+      "css": [
+        "themes/final-fantasy/assets/fonts.css",
+        "themes/final-fantasy/assets/sprites/party.css",
+        "themes/final-fantasy/assets/sprites/party-strips.css",
+        "themes/final-fantasy/assets/sprites/chocobo.css",
+        "themes/final-fantasy/assets/sprites/crystal.css",
+        "themes/final-fantasy/assets/sprites/menu-crystal.css",
+        "themes/final-fantasy/assets/sprites/cursor.css",
+        "themes/final-fantasy/assets/sprites/moogle.css",
+        "themes/final-fantasy/assets/sprites/items.css",
+        "themes/final-fantasy/assets/sprites/nav-icons.css",
+        "themes/final-fantasy/assets/sprites/shop-icons.css",
+        "themes/final-fantasy/assets/sprites/silhouette.css",
+        "themes/final-fantasy/assets/sprites/ambience.css",
+        "themes/final-fantasy/claude.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://chatgpt.com/*"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "src/registry.js",
+        "src/settings.js",
+        "src/content/core.js",
+        "src/content/signals.js",
+        "themes/final-fantasy/runtime.js"
+      ],
+      "css": [
+        "themes/final-fantasy/assets/fonts.css",
+        "themes/final-fantasy/assets/sprites/party.css",
+        "themes/final-fantasy/assets/sprites/party-strips.css",
+        "themes/final-fantasy/assets/sprites/chocobo.css",
+        "themes/final-fantasy/assets/sprites/crystal.css",
+        "themes/final-fantasy/assets/sprites/menu-crystal.css",
+        "themes/final-fantasy/assets/sprites/cursor.css",
+        "themes/final-fantasy/assets/sprites/moogle.css",
+        "themes/final-fantasy/assets/sprites/items.css",
+        "themes/final-fantasy/assets/sprites/nav-icons.css",
+        "themes/final-fantasy/assets/sprites/shop-icons.css",
+        "themes/final-fantasy/assets/sprites/silhouette.css",
+        "themes/final-fantasy/assets/sprites/ambience.css",
+        "themes/final-fantasy/chatgpt.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://gemini.google.com/*"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "src/registry.js",
+        "src/settings.js",
+        "src/content/core.js",
+        "src/content/signals.js",
+        "themes/final-fantasy/runtime.js"
+      ],
+      "css": [
+        "themes/final-fantasy/assets/fonts.css",
+        "themes/final-fantasy/assets/sprites/party.css",
+        "themes/final-fantasy/assets/sprites/party-strips.css",
+        "themes/final-fantasy/assets/sprites/chocobo.css",
+        "themes/final-fantasy/assets/sprites/crystal.css",
+        "themes/final-fantasy/assets/sprites/menu-crystal.css",
+        "themes/final-fantasy/assets/sprites/cursor.css",
+        "themes/final-fantasy/assets/sprites/moogle.css",
+        "themes/final-fantasy/assets/sprites/items.css",
+        "themes/final-fantasy/assets/sprites/nav-icons.css",
+        "themes/final-fantasy/assets/sprites/shop-icons.css",
+        "themes/final-fantasy/assets/sprites/silhouette.css",
+        "themes/final-fantasy/assets/sprites/ambience.css",
+        "themes/final-fantasy/gemini.css"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "themes/final-fantasy/assets/sounds/*.wav"
+      ],
+      "matches": [
+        "https://claude.ai/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*"
+      ]
+    }
+  ]
+}

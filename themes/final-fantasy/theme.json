@@ -1,0 +1,68 @@
+{
+  "id": "final-fantasy",
+  "name": "Final Fantasy",
+  "emoji": "💎",
+  "tagline": "Royal-blue menu windows, a crystal by every reply, and a party standing on your message box.",
+  "colors": { "bg": "#0b1240", "text": "#dbe4ff", "accent": "#ffd75e" },
+
+  "sites": {
+    "claude": "claude.css",
+    "chatgpt": "chatgpt.css",
+    "gemini": "gemini.css"
+  },
+  "styles": [
+    "assets/fonts.css",
+    "assets/sprites/party.css",
+    "assets/sprites/party-strips.css",
+    "assets/sprites/chocobo.css",
+    "assets/sprites/crystal.css",
+    "assets/sprites/menu-crystal.css",
+    "assets/sprites/cursor.css",
+    "assets/sprites/moogle.css",
+    "assets/sprites/items.css",
+    "assets/sprites/nav-icons.css",
+    "assets/sprites/shop-icons.css",
+    "assets/sprites/silhouette.css",
+    "assets/sprites/ambience.css"
+  ],
+  "script": "runtime.js",
+  "signals": ["replies", "working", "icons", "wide-tables"],
+  "files": ["assets/sounds/*.wav"],
+  "ship": ["assets/OFL.txt"],
+  "card": { "html": "card.html", "css": "card.css" },
+
+  "options": [
+    {
+      "id": "rich-text",
+      "label": "Colourful text",
+      "hint": "Bold, italics, headings, links and code picked out in menu colours",
+      "default": false
+    },
+    {
+      "id": "menu-sounds",
+      "label": "Menu sounds",
+      "hint": "The cursor blip when you hover a menu item, and a chime when you select",
+      "default": true
+    },
+    {
+      "id": "bottom-scenery",
+      "label": "Horizon scenery",
+      "hint": "A silhouetted scene along the bottom, behind everything",
+      "default": true
+    }
+  ],
+
+  "actions": [
+    {
+      "id": "choco",
+      "label": "Chocobo drive-by",
+      "emoji": "🐤",
+      "hint": "Sends one across every open tab wearing this theme",
+      "buttons": [
+        { "arg": "a", "label": "Parkour", "title": "Across the top of the message box, tripping the party" },
+        { "arg": "b", "label": "←", "title": "Behind the message box, right to left" },
+        { "arg": "c", "label": "→", "title": "Behind the message box, left to right" }
+      ]
+    }
+  ]
+}

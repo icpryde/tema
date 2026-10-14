@@ -1,0 +1,1714 @@
+/* ============================================================================
+   Tema — Final Fantasy, gemini.google.com
+
+   The Final Fantasy theme, ported to gemini.google.com. Same love letter —
+   royal blue menu windows, hard white frames, gold cursor, the crystal beside
+   every reply, the party idling on the composer — reseated on Gemini's DOM.
+
+   Written against the live signed-in Pro build (2026-08-11): the app is
+   Angular + Material, so surfaces hang off --gem-sys-color--* / --bard-color-*
+   custom properties (finished colours, not triplets), turns are
+   .conversation-container holding <user-query> (bubble:
+   .user-query-bubble-with-background) and <model-response> (body:
+   message-content .markdown; actions: <message-actions>; reasoning:
+   model-thoughts / .thoughts-container). The composer is <input-container> >
+   .input-area-container (a fieldset until the 2026-10 Gemini 4 build, a div
+   since, holding the Chat/Task toggle in zero state) > <input-area-v2> around a Quill
+   <rich-textarea> (.ql-editor). Sidebar rows are <gem-nav-list-item> keyed by
+   their link hrefs; icons everywhere are <mat-icon> font ligatures
+   (lumi-symbols / Google Symbols), so icon swaps hide the glyph text and draw
+   a sprite on the slot. Busy is stamped by the page signals as data-tema-working on
+   the newest model-response (stop affordance + pending markers, with
+   hysteresis), the same contract as the ChatGPT theme.
+
+   Covers both the Chat surface and the Spark tab: Spark reuses the same
+   chat-window / input-area-v2 / conversation-container machinery, so every
+   rule below that keys on those elements applies there unchanged.
+
+   Self-contained like its two siblings: the ambience scaffolding
+   (html::before/::after, the starfield pseudos, the fall keyframes) is
+   declared in each site file. The generated sprite sheets and fonts are
+   shared (theme.json "styles", loaded before this file on every site).
+   ========================================================================== */
+
+html[data-tema="final-fantasy"] {
+  /* --- window frame ------------------------------------------------------ */
+  --ff-win-top: #2f47a8;
+  --ff-win-mid: #16225e;
+  --ff-win-bot: #0b1240;
+  --ff-frame: #ffffff;
+  --ff-bevel: rgba(148, 176, 244, 0.55);
+  --ff-drop: rgba(3, 6, 22, 0.72);
+
+  --ff-gold: #ffd75e;
+  --ff-crystal-cyan: #8beaff;
+
+  --ff-window: linear-gradient(180deg, var(--ff-win-top) 0%, var(--ff-win-mid) 58%, var(--ff-win-bot) 100%);
+  --ff-window-user: linear-gradient(180deg, #3a55c4 0%, #1e2e78 58%, #12194f 100%);
+  --ff-window-reply: linear-gradient(180deg, #1a2568 0%, #0e1442 60%, #070b2a 100%);
+  --ff-frame-shadow:
+    inset 0 0 0 1px var(--ff-bevel),
+    0 3px 0 var(--ff-drop),
+    0 8px 22px rgba(0, 0, 0, 0.45);
+
+  /* --- type -------------------------------------------------------------- */
+  --ff-pixel: "FF Press Start", ui-monospace, monospace;
+  --ff-pixel-ui: "FF Silkscreen", "FF Press Start", ui-monospace, monospace;
+  --ff-body: var(--ff-pixel);
+  --ff-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ---------------------------------------------------------------- tokens */
+
+/* Gemini paints nearly everything through Material/system design tokens
+   holding finished colours. The page-wide surfaces go TRANSPARENT so the
+   body's sky gradient (below) shows through everywhere; anything that
+   genuinely needs its own panel (menus, dialogs, bubbles, composer) is
+   explicitly dressed as a menu window further down. */
+html[data-tema="final-fantasy"],
+html[data-tema="final-fantasy"] body,
+html[data-tema="final-fantasy"] body * {
+  /* System surface ramp: main canvases transparent, elevated panels navy. */
+  --gem-sys-color--surface: transparent !important;
+  --gem-sys-color--surface-dim: transparent !important;
+  --gem-sys-color--surface-bright: #1d2a75 !important;
+  --gem-sys-color--surface-container-lowest: rgba(7, 11, 42, 0.6) !important;
+  --gem-sys-color--surface-container-low: #131c58 !important;
+  --gem-sys-color--surface-container: #16205e !important;
+  --gem-sys-color--surface-container-high: #1a2568 !important;
+  --gem-sys-color--surface-container-highest: #1d2a75 !important;
+  --gem-sys-color--surface-variant: #1d2a75 !important;
+
+  --gem-sys-color--on-surface: #ffffff !important;
+  --gem-sys-color--on-surface-variant: #dbe4ff !important;
+  --gem-sys-color--on-surface-low: #a9b7e8 !important;
+
+  --gem-sys-color--outline: rgba(255, 255, 255, 0.55) !important;
+  --gem-sys-color--outline-variant: rgba(255, 255, 255, 0.3) !important;
+  --gem-sys-color--outline-low: rgba(255, 255, 255, 0.26) !important;
+
+  --gem-sys-color--primary: var(--ff-gold) !important;
+  --gem-sys-color--on-primary: #241c04 !important;
+  --gem-sys-color--primary-container: #1f2f78 !important;
+  --gem-sys-color--on-primary-container: #dbe4ff !important;
+  --gem-sys-color--secondary: #8beaff !important;
+  --gem-sys-color--secondary-container: #14406e !important;
+  --gem-sys-color--on-secondary-container: #c2e7ff !important;
+
+  /* Legacy bard tokens the sidenav and composer still read. */
+  --bard-color-sidenav-background-desktop: transparent !important;
+  --bard-color-sidenav-background-mobile: #10184c !important;
+  --bard-color-sidenav-scrim: rgba(4, 8, 30, 0.6) !important;
+  --bard-color-main-container-background: transparent !important;
+  --bard-color-chat-container-background: transparent !important;
+  --bard-color-response-container-background: transparent !important;
+  --bard-color-response-container-flipped-background: #16205e !important;
+  --bard-color-input-area-background: transparent !important;
+  --bard-color-input-companion-button-hover-background: rgba(255, 215, 94, 0.16) !important;
+  --bard-color-input-companion-button-active-background: rgba(255, 215, 94, 0.22) !important;
+  --bard-color-input-area-buttons-hover-background: rgba(255, 215, 94, 0.16) !important;
+  --bard-color-surface-tint: #8beaff !important;
+  --bard-color-on-surface: #ffffff !important;
+  --bard-color-on-surface-variant: #dbe4ff !important;
+
+  /* Material component panels (menus, dialogs, selects, tooltips, cards). */
+  --mat-menu-container-color: #131c58 !important;
+  --mat-menu-item-label-text-color: #ffffff !important;
+  --mat-menu-item-icon-color: #dbe4ff !important;
+  --mat-dialog-container-color: #131c58 !important;
+  --mat-select-panel-background-color: #131c58 !important;
+  --mat-option-label-text-color: #ffffff !important;
+  --mat-app-background-color: transparent !important;
+  --mat-app-text-color: #ffffff !important;
+  --mat-card-container-color: #131c58 !important;
+  --mat-tooltip-container-color: #10184c !important;
+  --mat-tooltip-supporting-text-color: #ffffff !important;
+  --mat-sidenav-container-background-color: transparent !important;
+  --mat-sidenav-content-background-color: transparent !important;
+  --mat-sidenav-container-text-color: #ffffff !important;
+  --mat-expansion-container-background-color: transparent !important;
+  --mat-expansion-container-text-color: #ffffff !important;
+  --mat-bottom-sheet-container-background-color: #131c58 !important;
+
+  /* Text tokens Gemini components read directly. */
+  --mat-slide-toggle-selected-track-color: var(--ff-gold) !important;
+  --mat-icon-color: #dbe4ff !important;
+}
+
+/* -------------------------------------------------------------- ambience */
+
+/* The sky. body carries the page gradient plus (optionally) the horizon
+   silhouette; the page's own wrappers were made transparent above, so this is
+   what shows behind every surface. Fixed attachment: the thread scroller is
+   thousands of px tall and a scrolling gradient would stretch to nothing. */
+html[data-tema="final-fantasy"] {
+  --ff-horizon: none;
+}
+html[data-tema="final-fantasy"][data-tema-opt~="bottom-scenery"] {
+  --ff-horizon: var(--ff-art-silhouette);
+}
+
+html[data-tema="final-fantasy"] body {
+  background-image: var(--ff-horizon), linear-gradient(180deg,
+    hsl(226 62% 26%) 0%,
+    hsl(230 64% 18%) 26%,
+    hsl(233 66% 12%) 58%,
+    hsl(234 66% 9%) 100%) !important;
+  background-attachment: fixed, fixed !important;
+  background-repeat: no-repeat, no-repeat !important;
+  /* Art composed with its subjects at the right, so they never leave the
+     screen; a wider window reveals more of the scene's left. Natural size. */
+  background-position: right bottom, center !important;
+  background-size:
+    calc(var(--ff-art-silhouette-w) * 1px) calc(var(--ff-art-silhouette-h) * 1px),
+    100% 100% !important;
+  background-color: #0b1240 !important;
+}
+
+/* The app's own full-height wrappers go glass so the sky shows through.
+   input-container gets extra selector weight and the longhand too: it ships
+   an opaque #0f0f0f of its own that showed as a black band across the
+   viewport bottom the moment a reply pushed the layout — the band is this
+   element, not the collapsed toolbox drawer. */
+html[data-tema="final-fantasy"] chat-app,
+html[data-tema="final-fantasy"] main.chat-app,
+html[data-tema="final-fantasy"] bard-sidenav-container,
+html[data-tema="final-fantasy"] bard-sidenav-content,
+html[data-tema="final-fantasy"] chat-window,
+html[data-tema="final-fantasy"] chat-window-content,
+html[data-tema="final-fantasy"] #chat-history,
+html[data-tema="final-fantasy"] .chat-container,
+html[data-tema="final-fantasy"] input-container,
+html[data-tema="final-fantasy"] body input-container,
+html[data-tema="final-fantasy"] chat-window input-container,
+html[data-tema="final-fantasy"] input-container.hide-on-print {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Moon + corner washes, floating above the page (same layer budget as the
+   claude theme: html::before is scenery, html::after is the falling motes,
+   body::before/::after are the two starfields). All are pointer-events-none
+   fixed layers. */
+html[data-tema="final-fantasy"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2147483645;
+  background-image:
+    var(--ff-art-moon),
+    radial-gradient(1100px 700px at 50% -14%, rgba(72, 116, 255, 0.16), transparent 72%),
+    radial-gradient(900px 620px at -8% 108%, rgba(30, 58, 176, 0.12), transparent 74%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position:
+    right clamp(10px, 3.4vw, 78px) top clamp(8px, 2.2vh, 34px),
+    center, center;
+  background-size: clamp(118px, 14vw, 208px), auto, auto;
+}
+
+@media (max-width: 560px) {
+  html[data-tema="final-fantasy"]::before { background-image: none, none, none; }
+}
+
+@keyframes ff-fall { from { transform: translateY(0); } to { transform: translateY(460px); } }
+
+/* Crystal motes drifting down. */
+html[data-tema="final-fantasy"]::after {
+  content: "";
+  position: fixed;
+  left: 0; right: 0; top: -460px; bottom: 0;
+  pointer-events: none;
+  z-index: 2147483646;
+  will-change: transform;
+  opacity: 0.75;
+  background-repeat: repeat;
+  background-image: var(--ff-art-motes);
+  animation: ff-fall 34s linear infinite;
+}
+
+@keyframes ff-twinkle {
+  0%, 100% { opacity: 0.18; }
+  38%      { opacity: 1; }
+  64%      { opacity: 0.32; }
+}
+
+html[data-tema="final-fantasy"] body::before,
+html[data-tema="final-fantasy"] body::after {
+  content: "";
+  position: fixed;
+  left: 0; right: 0; top: -460px; bottom: 0;
+  pointer-events: none;
+  z-index: 2147483644;
+  will-change: transform;
+  background-repeat: repeat;
+}
+
+html[data-tema="final-fantasy"] body::before {
+  background-image: var(--ff-art-stars-far);
+  opacity: 0.62;
+  animation: ff-fall 72s linear infinite;
+}
+
+html[data-tema="final-fantasy"] body::after {
+  background-image: var(--ff-art-stars-near);
+  animation:
+    ff-fall 46s linear infinite,
+    ff-twinkle 4.6s ease-in-out infinite;
+}
+
+/* Shooting stars — spawned by runtime.js, geometry per-star. */
+html[data-tema="final-fantasy"] .ff-shooting-star {
+  position: fixed;
+  z-index: 2147483643;
+  width: var(--len, 140px);
+  height: 2px;
+  border-radius: 2px;
+  transform-origin: 0 50%;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(180, 214, 255, 0) 0%,
+    rgba(190, 224, 255, 0.55) 55%,
+    rgba(236, 248, 255, 0.95) 88%,
+    #ffffff 100%);
+  filter: drop-shadow(0 0 6px rgba(150, 210, 255, 0.85));
+  animation: ff-shoot var(--dur, 1.4s) cubic-bezier(0.25, 0.5, 0.5, 1) forwards;
+}
+
+@keyframes ff-shoot {
+  0%   { transform: rotate(var(--ang, 30deg)) translateX(0); opacity: 0; }
+  12%  { opacity: 1; }
+  72%  { opacity: 1; }
+  100% { transform: rotate(var(--ang, 30deg)) translateX(var(--travel, 100vw)); opacity: 0; }
+}
+
+/* ------------------------------------------------------------------ type */
+
+/* Gemini sets families high up and sizes per element, so one body-level
+   override carries the UI face everywhere; prose and code re-declare below.
+   mat-icon is exempted right after — its "text" is a ligature glyph, and a
+   pixel font on it would literally spell the icon's name. */
+html[data-tema="final-fantasy"] body,
+html[data-tema="final-fantasy"] button,
+html[data-tema="final-fantasy"] input,
+html[data-tema="final-fantasy"] select,
+html[data-tema="final-fantasy"] textarea,
+html[data-tema="final-fantasy"] kbd {
+  font-family: var(--ff-pixel-ui) !important;
+  letter-spacing: 0.01em;
+}
+
+html[data-tema="final-fantasy"] mat-icon,
+html[data-tema="final-fantasy"] .lumi-symbols,
+html[data-tema="final-fantasy"] .google-symbols,
+html[data-tema="final-fantasy"] .material-symbols-outlined {
+  font-family: "Luminous Symbols", "lumi-symbols", "Google Symbols", "Material Symbols Outlined", "Material Symbols Rounded" !important;
+  letter-spacing: normal;
+}
+
+/* Message and composer text — Press Start 2P (real lowercase; Silkscreen's
+   lowercase is bitmap-identical to caps and reads as SHOUTING).
+
+   0.75rem = 12px, and both the unit and the number are load-bearing: REM
+   because the list includes `*` and an em would compound per nesting level;
+   12px because Press Start 2P sits on an 8px grid and is only crisp at whole
+   device pixels per glyph pixel (on 2x: 12px = exactly 3). Adjust only in
+   whole 4px steps. Colour stated EXPLICITLY — never inherited from the site's
+   tokens (the friend-build lesson from claude.ai). */
+html[data-tema="final-fantasy"] .markdown,
+html[data-tema="final-fantasy"] .markdown :not(mat-icon):not(code):not(pre):not(pre *),
+html[data-tema="final-fantasy"] user-query .query-text,
+html[data-tema="final-fantasy"] user-query .query-text *,
+html[data-tema="final-fantasy"] rich-textarea .ql-editor,
+html[data-tema="final-fantasy"] rich-textarea .ql-editor :not(mat-icon) {
+  font-family: var(--ff-body) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.9 !important;
+  letter-spacing: normal;
+  color: #fff !important;
+}
+
+/* Code keeps a real monospace, inside prose and composer alike. */
+html[data-tema="final-fantasy"] code,
+html[data-tema="final-fantasy"] pre,
+html[data-tema="final-fantasy"] pre *,
+html[data-tema="final-fantasy"] code-block,
+html[data-tema="final-fantasy"] code-block .code-container * {
+  font-family: var(--ff-mono) !important;
+}
+
+/* Markdown headings inside replies: pixel with the classic hard shadow. */
+html[data-tema="final-fantasy"] .markdown h1,
+html[data-tema="final-fantasy"] .markdown h2,
+html[data-tema="final-fantasy"] .markdown h3,
+html[data-tema="final-fantasy"] .markdown h4 {
+  font-family: var(--ff-pixel) !important;
+  font-size: 0.875rem !important;   /* 14px — one step above body, still on grid at 2x */
+  line-height: 1.8 !important;
+  text-shadow: 2px 2px 0 rgba(3, 6, 22, 0.85);
+  letter-spacing: 0.02em;
+}
+
+/* The zero-state greeting ("Your move, <name>!"): .zero-state-container >
+   modular-zero-state > h1.gds-display-m > span.message-text on the live
+   build, solid text (no gradient there to preserve). Pixel face, gold, the
+   classic hard shadow. Scoped to the h1 so any suggestion chips below keep
+   the UI face. clamp: Press Start is fixed-width and the line length varies
+   with the wording and the user's name. */
+html[data-tema="final-fantasy"] modular-zero-state h1,
+html[data-tema="final-fantasy"] modular-zero-state h1 *,
+html[data-tema="final-fantasy"] .zero-state-container h1,
+html[data-tema="final-fantasy"] .zero-state-container h1 * {
+  font-family: var(--ff-pixel) !important;
+  font-size: clamp(0.95rem, 2.2vw, 1.35rem) !important;
+  line-height: 1.7 !important;
+  letter-spacing: 0.02em;
+  color: var(--ff-gold) !important;
+  -webkit-text-fill-color: var(--ff-gold) !important;
+  background: none !important;
+  text-shadow: 2px 2px 0 rgba(3, 6, 22, 0.85);
+}
+
+/* The composer placeholder ("Ask Gemini"). Quill draws it as a ::before on
+   the empty editor. */
+html[data-tema="final-fantasy"] rich-textarea .ql-editor.ql-blank::before {
+  color: #a9b7e8 !important;
+  opacity: 1;
+  font-family: var(--ff-body) !important;
+  font-size: 0.75rem !important;
+}
+
+/* The tiny print under the composer ("Gemini is AI and can make mistakes"). */
+html[data-tema="final-fantasy"] hallucination-disclaimer,
+html[data-tema="final-fantasy"] hallucination-disclaimer * {
+  font-family: var(--ff-pixel-ui) !important;
+  color: #8fa0d8 !important;
+}
+
+/* ---------------------------------------------------------- menu windows */
+
+/* Your messages: the brighter blue window. */
+html[data-tema="final-fantasy"] user-query .user-query-bubble-with-background,
+html[data-tema="final-fantasy"] .user-query-bubble-with-background {
+  background: var(--ff-window-user) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  color: #fff !important;
+}
+
+/* Menus, dialogs, selects and every other overlay panel. Two families:
+   Material's cdk-overlay panels (dialogs, tooltips, some menus) and Gemini's
+   own inline gem-menu popovers (the mode picker, at-mentions) rendered as
+   div.popover-menu right beside their trigger. */
+html[data-tema="final-fantasy"] .cdk-overlay-container .mat-mdc-menu-panel,
+html[data-tema="final-fantasy"] .cdk-overlay-container .mat-mdc-select-panel,
+html[data-tema="final-fantasy"] .cdk-overlay-container .mat-mdc-autocomplete-panel,
+html[data-tema="final-fantasy"] .cdk-overlay-container .mat-mdc-dialog-surface,
+html[data-tema="final-fantasy"] .cdk-overlay-container .mat-bottom-sheet-container,
+html[data-tema="final-fantasy"] .popover-menu,
+html[data-tema="final-fantasy"] gem-menu[role="menu"] {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  color: #fff !important;
+}
+/* A gem-menu inside a popover-menu: one window, not a frame in a frame. */
+html[data-tema="final-fantasy"] .popover-menu gem-menu[role="menu"] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-tema="final-fantasy"] .mat-mdc-menu-item:hover,
+html[data-tema="final-fantasy"] .mat-mdc-option:hover,
+html[data-tema="final-fantasy"] .mat-mdc-menu-item.mat-mdc-menu-item-highlighted,
+html[data-tema="final-fantasy"] .mat-mdc-option.mat-mdc-option-active,
+html[data-tema="final-fantasy"] gem-menu-item:hover,
+html[data-tema="final-fantasy"] gem-menu-item.active {
+  background: rgba(255, 215, 94, 0.16) !important;
+}
+html[data-tema="final-fantasy"] .mat-mdc-menu-item:hover .mat-mdc-menu-item-text,
+html[data-tema="final-fantasy"] .mat-mdc-menu-item.mat-mdc-menu-item-highlighted .mat-mdc-menu-item-text,
+html[data-tema="final-fantasy"] gem-menu-item:hover *,
+html[data-tema="final-fantasy"] gem-menu-item.active * {
+  color: var(--ff-gold) !important;
+}
+/* The currently-selected mode wears gold outright, like a menu cursor row. */
+html[data-tema="final-fantasy"] gem-menu-item.selected,
+html[data-tema="final-fantasy"] gem-menu-item.selected * {
+  color: var(--ff-gold) !important;
+}
+
+/* The composer's + menu ("Upload and tools"), its More-uploads/More-tools
+   flyouts, and any other lm-menu Material card in the overlay: these are
+   mat-cards (bg #1f1f1f, radius 20px stock), not mat-menu panels, so they
+   get their window dressing here. Scoped to the menu-flavoured cards so a
+   future genuine content card isn't framed by accident. */
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-card.lm-menu-theme,
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-card[class*="card-container"],
+html[data-tema="final-fantasy"] body mat-card.lm-menu-theme.card-container,
+html[data-tema="final-fantasy"] mat-card.lm-menu-theme {
+  /* The stock #1f1f1f fill is a literal, high-specificity declaration in a
+     cross-origin sheet (no token drives it), so every longhand is stated
+     here in full battle dress — the shorthand alone lost to it live. */
+  background: var(--ff-window) !important;
+  background-color: var(--ff-win-mid) !important;
+  background-image: linear-gradient(180deg, var(--ff-win-top) 0%, var(--ff-win-mid) 58%, var(--ff-win-bot) 100%) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  color: #fff !important;
+}
+
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-action-list {
+  background: transparent !important;
+}
+
+html[data-tema="final-fantasy"] .cdk-overlay-container button.lm-menu-item-theme,
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-action-list button {
+  color: #fff !important;
+  font-family: var(--ff-pixel-ui) !important;
+  border-radius: 4px !important;
+}
+
+/* The rows' text spans (.menu-text / .item) re-declare Google Sans on
+   themselves, and their class names drift per A/B build — so besides the
+   named spans, everything under a card runtime.js has stamped with
+   data-ff-menu gets the pixel face except the icon ligatures. */
+html[data-tema="final-fantasy"] .cdk-overlay-container button.lm-menu-item-theme .menu-text,
+html[data-tema="final-fantasy"] .cdk-overlay-container button.lm-menu-item-theme .item,
+html[data-tema="final-fantasy"] .cdk-overlay-container button.lm-menu-item-theme span:not(.mat-mdc-button-persistent-ripple),
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-action-list button span:not(.mat-mdc-button-persistent-ripple),
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] span:not(.mat-mdc-button-persistent-ripple):not([class*="lumi"]),
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] button:not([class*="lumi"]),
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] .mdc-list-item__primary-text {
+  font-family: var(--ff-pixel-ui) !important;
+  color: #fff !important;
+  font-size: 12px !important;
+}
+
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] mat-icon {
+  font-family: "Luminous Symbols", "lumi-symbols", "Google Symbols", "Material Symbols Outlined" !important;
+  font-size: 20px !important;
+  color: #dbe4ff !important;
+}
+
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] button:hover span:not(.mat-mdc-button-persistent-ripple),
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] button:hover mat-icon {
+  color: var(--ff-gold) !important;
+}
+
+/* Hover/selected rows inside dressed surfaces: Material paints these with
+   dynamic grey state layers (hover pseudo-classes, --selected modifiers,
+   ripple ::before), which inline pins can't reach — they flip at runtime.
+   All of them go gold wash instead of grey. */
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] button:hover,
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] a:hover,
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] [class*="--selected"],
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] [class*="highlighted"],
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] [aria-checked="true"],
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] [aria-expanded="true"] {
+  background: rgba(255, 215, 94, 0.16) !important;
+  background-color: rgba(255, 215, 94, 0.16) !important;
+}
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] button::before,
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] .mdc-list-item__ripple::before,
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] .mat-mdc-button-persistent-ripple::before,
+html[data-tema="final-fantasy"] mat-card[data-ff-menu] .mat-ripple-element {
+  background: rgba(255, 215, 94, 0.25) !important;
+  background-color: rgba(255, 215, 94, 0.25) !important;
+}
+
+/* The send slot's box, final form. Three ways it dodged every fix so far:
+   the painting wrapper is sometimes a BARE gem-icon-button (no .send-button
+   class to key on), Material draws button fills on inner-span PSEUDO layers
+   (which inline pins cannot touch, like the scroll-fade), and Angular
+   recreates the button per keystroke (outrunning any JS re-pin). One
+   stylesheet block covers all three — CSS re-applies instantly on
+   recreation. Wrapper-level only: the mic/mode chips style their BUTTON
+   elements, which stay untouched, and the hand itself is the send button's
+   own ::after, deliberately absent from the pseudo list. */
+html[data-tema="final-fantasy"] [data-test-id="send-button-container"],
+html[data-tema="final-fantasy"] gem-icon-button.send-button,
+html[data-tema="final-fantasy"] .send-button-container,
+html[data-tema="final-fantasy"] input-area-v2 .trailing-actions-wrapper gem-icon-button,
+html[data-tema="final-fantasy"] input-area-v2 .persistent-mic gem-icon-button {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Pseudo purge, keyed on the JS stamp itself rather than container names —
+   the slot's hierarchy drifts per build (gem-icon inside the button, no
+   wrapper at all on some), but the stamp follows the sweep wherever it
+   goes. The send button's own ::after is the hand and stays; its ::before
+   and every stamped descendant's pseudos go. */
+html[data-tema="final-fantasy"] [data-ff-send-clear]:not(button)::before,
+html[data-tema="final-fantasy"] [data-ff-send-clear]:not(button)::after,
+html[data-tema="final-fantasy"] button[data-ff-send-clear]::before,
+html[data-tema="final-fantasy"] button[aria-label="Send message" i]::before,
+html[data-tema="final-fantasy"] button[aria-label*="submit" i]::before {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+/* Forensically confirmed: at rest NOTHING paints behind the hand; the box
+   is the MDC state layer flooding in on hover/focus/press (the ripple
+   span's ::before, opacity 0 until touched). Killed by opacity as well as
+   colour, so whatever it fills with, it never shows. */
+html[data-tema="final-fantasy"] [data-ff-send-clear] .mat-mdc-button-persistent-ripple::before,
+html[data-tema="final-fantasy"] [data-ff-send-clear] .mat-ripple-element,
+html[data-tema="final-fantasy"] button[aria-label="Send message" i] .mat-mdc-button-persistent-ripple::before,
+html[data-tema="final-fantasy"] button[aria-label*="submit" i] .mat-mdc-button-persistent-ripple::before {
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
+html[data-tema="final-fantasy"] .cdk-overlay-container button.lm-menu-item-theme:hover,
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-action-list button:hover {
+  background: rgba(255, 215, 94, 0.16) !important;
+}
+html[data-tema="final-fantasy"] .cdk-overlay-container button.lm-menu-item-theme:hover *,
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-action-list button:hover * {
+  color: var(--ff-gold) !important;
+}
+
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-divider {
+  border-top-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Tooltips. .mdc-tooltip only — a classless [role="tooltip"] a11y describer
+   idles inside .cdk-visually-hidden and must not be dressed. */
+html[data-tema="final-fantasy"] .mdc-tooltip__surface,
+html[data-tema="final-fantasy"] .mat-mdc-tooltip-surface,
+html[data-tema="final-fantasy"] .mdc-tooltip.gem-tooltip,
+html[data-tema="final-fantasy"] mat-tooltip-component .mdc-tooltip {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 5px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  font-family: var(--ff-pixel-ui) !important;
+  color: #fff !important;
+}
+
+/* The overlay scrim behind dialogs. */
+html[data-tema="final-fantasy"] .cdk-overlay-dark-backdrop {
+  background: rgba(4, 8, 30, 0.6) !important;
+}
+
+/* Anti-flash veil: a freshly-mounted overlay card paints Google-dark for a
+   frame or two before runtime.js dresses it. Undressed cards hold invisible;
+   the stamp reveals them the instant the window fill is on. The 90ms
+   animation is the dead-man's switch — pure CSS, so even with the script
+   gone a menu can never stay hidden. Deliberately NOT !important: important
+   opacity would also outrank the reveal animation itself. */
+@keyframes ff-menu-veil { to { opacity: 1; } }
+
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-card:not([data-ff-menu]),
+html[data-tema="final-fantasy"] .cdk-overlay-container .mat-mdc-dialog-surface:not([data-ff-menu]),
+html[data-tema="final-fantasy"] .cdk-overlay-container .mdc-dialog__surface:not([data-ff-menu]) {
+  opacity: 0;
+  animation: ff-menu-veil 0s linear 90ms forwards;
+}
+
+html[data-tema="final-fantasy"] .cdk-overlay-container mat-card[data-ff-menu],
+html[data-tema="final-fantasy"] .cdk-overlay-container .mat-mdc-dialog-surface[data-ff-menu],
+html[data-tema="final-fantasy"] .cdk-overlay-container .mdc-dialog__surface[data-ff-menu] {
+  opacity: 1;
+  animation: none;
+}
+
+/* Chips (the notebook "N sources" pill and friends): little blue menu
+   buttons, keyline and all. */
+html[data-tema="final-fantasy"] mat-chip,
+html[data-tema="final-fantasy"] mat-chip .mdc-evolution-chip__action,
+html[data-tema="final-fantasy"] [class*="source-chip"],
+html[data-tema="final-fantasy"] button[class*="sources-button"],
+html[data-tema="final-fantasy"] [class*="source-count"] {
+  background: linear-gradient(180deg, rgba(84, 114, 214, 0.55), rgba(18, 30, 92, 0.75)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  font-family: var(--ff-pixel-ui) !important;
+  box-shadow: 0 2px 0 rgba(3, 6, 22, 0.5);
+}
+html[data-tema="final-fantasy"] mat-chip *:not(mat-icon):not(img) {
+  background: transparent !important;
+  color: #fff !important;
+}
+html[data-tema="final-fantasy"] mat-chip:hover,
+html[data-tema="final-fantasy"] [class*="source-chip"]:hover {
+  border-color: var(--ff-gold) !important;
+}
+
+/* ------------------------------------------------------- reply windows */
+
+/* The page signals stamp data-tema-reply on <model-response> once the reply holds
+   real text (thoughts excluded), and data-tema-latest on the newest — same
+   contract as the other sites. The frame wraps the response content, not the
+   whole turn, so the action row below stays outside the window. */
+html[data-tema="final-fantasy"] model-response[data-tema-reply] .response-container-content {
+  background: var(--ff-window-reply) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: var(--ff-frame-shadow);
+  padding: 10px 14px 10px 40px !important;
+  position: relative;
+}
+
+/* Crystal in the window's left gutter — the speaker mark. Width derives from
+   the ripped asset's own aspect so a re-rip never squashes it. */
+@keyframes ff-crystal-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(120, 220, 255, 0.55)) brightness(1);
+    transform: translateY(0);
+  }
+  50% {
+    filter: drop-shadow(0 0 11px rgba(150, 235, 255, 0.95)) brightness(1.15);
+    transform: translateY(-2px);
+  }
+}
+
+html[data-tema="final-fantasy"] model-response[data-tema-reply] .response-container-content::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 12px;
+  height: 32px;
+  width: calc(32px * var(--ff-art-crystal-w) / var(--ff-art-crystal-h));
+  background: var(--ff-art-crystal) center / contain no-repeat;
+  image-rendering: pixelated;
+  animation: ff-crystal-pulse 3.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  html[data-tema="final-fantasy"] model-response[data-tema-reply] .response-container-content { padding-left: 14px !important; }
+  html[data-tema="final-fantasy"] model-response[data-tema-reply] .response-container-content::before { display: none; }
+}
+
+/* The newest reply breathes. */
+@keyframes ff-reply-breathe {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px var(--ff-bevel),
+      0 0 12px 1px rgba(92, 152, 255, 0.28),
+      0 3px 0 var(--ff-drop);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(196, 220, 255, 0.7),
+      0 0 26px 5px rgba(134, 202, 255, 0.5),
+      0 3px 0 var(--ff-drop);
+  }
+}
+
+html[data-tema="final-fantasy"] model-response[data-tema-latest][data-tema-reply] .response-container-content {
+  animation: ff-reply-breathe 4.2s ease-in-out infinite;
+}
+
+/* Gemini's transient "Thinking…" banner, mounted below the newest turn
+   while the model reasons. A small menu window, indented past Mog's post so
+   he reads as its herald rather than its obstruction. */
+html[data-tema="final-fantasy"] .thinking-banner {
+  display: inline-flex !important;
+  align-items: center;
+  margin-left: 40px !important;
+  margin-top: 4px;
+  padding: 4px 10px !important;
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 0 var(--ff-drop) !important;
+  font-family: var(--ff-pixel-ui) !important;
+  color: #fff !important;
+}
+
+/* The chat's bottom scroll-fade — the "second layer" text disappears
+   behind — is not an element at all: it is input-container::before, a
+   28px transparent-to-black gradient strip. No DOM sweep can touch a
+   pseudo-element, which is how it outlived every measured fix; a plain
+   stylesheet override wins here (verified live, applied and reverted).
+   Repainted as a night-sky fade in the sky gradient's own bottom colour,
+   so scrolling text melts into our dark instead of Google's black. */
+html[data-tema="final-fantasy"] input-container::before,
+html[data-tema="final-fantasy"] input-container::after {
+  background: linear-gradient(180deg, rgba(8, 10, 36, 0) 0%, rgba(8, 10, 36, 0.6) 60%, rgba(8, 10, 36, 0.85) 100%) !important;
+}
+
+/* The pre-text skeleton shimmer, re-tinted to the window palette. */
+html[data-tema="final-fantasy"] .skeleton-loader-container,
+html[data-tema="final-fantasy"] .skeleton-loader-container * {
+  background-color: rgba(47, 71, 168, 0.3) !important;
+}
+
+/* The thoughts drawer ("Show thinking") inside a reply: a quieter inset
+   panel, like a scroll tucked into the window. */
+html[data-tema="final-fantasy"] model-thoughts:not(:empty),
+html[data-tema="final-fantasy"] thinking-overlay:not(:empty),
+html[data-tema="final-fantasy"] .thoughts-container {
+  background: rgba(4, 8, 30, 0.45) !important;
+  border: 1px solid rgba(150, 180, 255, 0.25) !important;
+  border-radius: 5px !important;
+}
+html[data-tema="final-fantasy"] .thoughts-content {
+  background: transparent !important;
+}
+
+/* Code blocks lift off the window fill instead of blurring into it. */
+html[data-tema="final-fantasy"] .markdown pre,
+html[data-tema="final-fantasy"] code-block,
+html[data-tema="final-fantasy"] .code-block {
+  background: rgba(4, 8, 30, 0.55) !important;
+  border: 1px solid rgba(150, 180, 255, 0.22) !important;
+  border-radius: 5px !important;
+}
+html[data-tema="final-fantasy"] .markdown pre > div,
+html[data-tema="final-fantasy"] code-block .code-container,
+html[data-tema="final-fantasy"] .code-block-decoration {
+  background: transparent !important;
+}
+
+/* Markdown tables as menu grids. */
+html[data-tema="final-fantasy"] .markdown table,
+html[data-tema="final-fantasy"] .markdown th,
+html[data-tema="final-fantasy"] .markdown td {
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+}
+html[data-tema="final-fantasy"] .markdown th {
+  background: rgba(47, 71, 168, 0.45) !important;
+}
+
+/* The response action row (thumbs, redo, copy, more) goes gold on hover. */
+html[data-tema="final-fantasy"] message-actions button:hover mat-icon {
+  color: var(--ff-gold) !important;
+}
+
+/* ------------------------------------------------------ composer + glow */
+
+@keyframes ff-breathe {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px var(--ff-bevel),
+      0 0 13px 1px rgba(92, 152, 255, 0.34),
+      0 3px 0 var(--ff-drop);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(196, 220, 255, 0.8),
+      0 0 30px 6px rgba(134, 202, 255, 0.6),
+      0 3px 0 var(--ff-drop);
+  }
+}
+
+/* The composer pill is the menu window. Gemini rounds it heavily via its own
+   classes, hence !important. z-index: 0 grants a stacking context so the
+   chocobo's clipped runs can sit at z:-1 — above this window's own paint,
+   below the text being typed (the same trick the other two sites needed). */
+html[data-tema="final-fantasy"] input-container .input-area-container,
+html[data-tema="final-fantasy"] fieldset.input-area-container {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 9px !important;
+  position: relative;
+  z-index: 0;
+  overflow: visible !important;
+  animation: ff-breathe 4.2s ease-in-out infinite;
+}
+
+/* Everything the pill wraps goes glass so the window gradient reads through.
+   The input-area-v2 HOST owns the stock pill (fill, 32px radius, its own
+   box-shadow) on the live build — flattened here so the fieldset window
+   above is the only box that paints. */
+html[data-tema="final-fantasy"] input-area-v2 {
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+}
+html[data-tema="final-fantasy"] input-area-v2,
+html[data-tema="final-fantasy"] input-area-v2 .input-area,
+html[data-tema="final-fantasy"] input-area-v2 .text-input-field,
+html[data-tema="final-fantasy"] rich-textarea,
+html[data-tema="final-fantasy"] rich-textarea .ql-editor {
+  background: transparent !important;
+}
+
+/* The Gemini 4 build (2026-10) mounts the Chat/Task toggle
+   (chat-spark-toggle, zero state only) INSIDE the composer box, under the
+   input row. Stock fills only the row and lets the toggle float beneath it;
+   painting the whole box put the toggle inside the window. While it is
+   mounted the box goes glass (its 2px border stays, clear, so Gemini's
+   layout math is untouched) and ::before draws the window around
+   input-area-v2 alone. It is anchor-positioned to the row, not offset by
+   the toggle's height, so it tracks a growing input and stays right when
+   Gemini display:none's the toggle mid-flow. Without anchor support it
+   falls back to the whole box, the old look. z -2 keeps it under the
+   chocobo's clip (z -1), and the typed text above both. */
+html[data-tema="final-fantasy"] input-container .input-area-container:has(> chat-spark-toggle) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+html[data-tema="final-fantasy"] input-container .input-area-container:has(> chat-spark-toggle) > input-area-v2 {
+  anchor-name: --ff-pill;
+}
+html[data-tema="final-fantasy"] input-container .input-area-container:has(> chat-spark-toggle)::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  position-anchor: --ff-pill;
+  top: calc(anchor(top) - 2px);
+  left: calc(anchor(left) - 2px);
+  right: calc(anchor(right) - 2px);
+  bottom: calc(anchor(bottom) - 2px);
+  background: var(--ff-window);
+  border: 2px solid var(--ff-frame);
+  border-radius: 9px;
+  z-index: -2;
+  pointer-events: none;
+  animation: ff-breathe 4.2s ease-in-out infinite;
+}
+
+/* The toggle itself: a little two-tab menu window under the composer.
+   Gemini slides .gem-segmented-button-row-slider between the tabs from
+   --gem-active-index; it becomes the gold cursor bar. Stock fills it with
+   surface-container-highest, navy on our navy window, which is why the
+   tabs read as washed out. The row's radial mask-image would clip the
+   frame's drop shadow, so it goes. */
+html[data-tema="final-fantasy"] chat-spark-toggle gem-segmented-button-row {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: inset 0 0 0 1px var(--ff-bevel), 0 2px 0 var(--ff-drop) !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button-row-slider {
+  background: linear-gradient(180deg, #ffe58f 0%, #ffd75e 55%, #e2b83a 100%) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 0 rgba(3, 6, 22, 0.6) !important;
+}
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button-action {
+  background: transparent !important;
+  border-radius: 4px !important;
+  height: 28px !important;
+  padding: 0 14px !important;
+}
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button-action,
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button-action * {
+  font-family: var(--ff-pixel-ui) !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.04em;
+  color: #dbe4ff !important;
+}
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button:not(.gem-segmented-button-selected) .gem-segmented-button-action:hover {
+  background: rgba(255, 215, 94, 0.12) !important;
+}
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button:not(.gem-segmented-button-selected) .gem-segmented-button-action:hover,
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button:not(.gem-segmented-button-selected) .gem-segmented-button-action:hover * {
+  color: var(--ff-gold) !important;
+}
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button-selected .gem-segmented-button-action,
+html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button-selected .gem-segmented-button-action * {
+  color: #241c04 !important;
+}
+
+/* Composer control chips: plus/toolbox, mode pill, mic, stop. Cosmetic
+   only — but sized to ONE height so the row reads as a matched set (the
+   stock buttons come in three different sizes, which looked ragged next
+   to the windowed pill). The send button opts out: it is the select hand,
+   drawn frameless below. */
+html[data-tema="final-fantasy"] input-area-v2 .leading-actions-wrapper button:not([aria-label="Send message"]):not([data-test-id="send-button-container"] *):not(gem-icon-button.send-button *),
+html[data-tema="final-fantasy"] input-area-v2 .trailing-actions-wrapper button:not([aria-label="Send message"]):not([data-test-id="send-button-container"] *):not(gem-icon-button.send-button *),
+html[data-tema="final-fantasy"] button[data-test-id="bard-mode-menu-button"] {
+  border: 1px solid rgba(255, 255, 255, 0.42) !important;
+  border-radius: 3px !important;
+  background: linear-gradient(180deg, rgba(84, 114, 214, 0.45), rgba(18, 30, 92, 0.45)) !important;
+  color: #fff !important;
+  font-family: var(--ff-pixel-ui) !important;
+  box-shadow: 0 2px 0 rgba(3, 6, 22, 0.5);
+  height: 32px !important;
+  min-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+html[data-tema="final-fantasy"] input-area-v2 .leading-actions-wrapper button:not([aria-label="Send message"]):hover,
+html[data-tema="final-fantasy"] input-area-v2 .trailing-actions-wrapper button:not([aria-label="Send message"]):hover,
+html[data-tema="final-fantasy"] button[data-test-id="bard-mode-menu-button"]:hover {
+  border-color: var(--ff-gold) !important;
+  color: var(--ff-gold) !important;
+}
+html[data-tema="final-fantasy"] input-area-v2 .trailing-actions-wrapper button:hover mat-icon,
+html[data-tema="final-fantasy"] input-area-v2 .leading-actions-wrapper button:hover mat-icon {
+  color: var(--ff-gold) !important;
+}
+
+/* ---------------------------------------------------------- send button */
+
+/* The select hand, mirrored to point left into the text. The send button
+   only mounts once the composer has content; the mic keeps its own look.
+   The trailing-wrapper variants are listed so this always outweighs the
+   chip rule above — the chip's frame on this button was the mystery box
+   behind the finger. */
+html[data-tema="final-fantasy"] [data-test-id="send-button-container"] button,
+html[data-tema="final-fantasy"] input-area-v2 .trailing-actions-wrapper button[aria-label="Send message"],
+html[data-tema="final-fantasy"] gem-icon-button.send-button button,
+html[data-tema="final-fantasy"] button[aria-label="Send message"] {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  position: relative;
+  overflow: visible !important;
+  height: 32px !important;
+  min-width: 36px !important;
+}
+
+html[data-tema="final-fantasy"] [data-test-id="send-button-container"] button > *,
+html[data-tema="final-fantasy"] button[aria-label="Send message"] > * {
+  opacity: 0 !important;
+}
+
+html[data-tema="final-fantasy"] [data-test-id="send-button-container"] button::after,
+html[data-tema="final-fantasy"] button[aria-label="Send message"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  height: calc(var(--ff-art-cursor-h) * 2px);
+  width: calc(var(--ff-art-cursor-w) * 2px);
+  background: var(--ff-art-cursor) center / contain no-repeat;
+  image-rendering: pixelated;
+  transform: scaleX(-1);
+  filter: drop-shadow(0 0 5px rgba(150, 200, 255, 0.55));
+}
+
+html[data-tema="final-fantasy"] [data-test-id="send-button-container"] button:hover::after,
+html[data-tema="final-fantasy"] button[aria-label="Send message"]:hover::after {
+  filter: drop-shadow(0 0 9px rgba(255, 215, 94, 0.9));
+}
+
+/* Stop stays a real control — gold frame so it reads as the active verb.
+   It usually replaces the send arrow in the same slot mid-run. */
+html[data-tema="final-fantasy"] button[aria-label*="stop" i] {
+  background: linear-gradient(180deg, rgba(84, 114, 214, 0.55), rgba(18, 30, 92, 0.55)) !important;
+  border: 1px solid var(--ff-gold) !important;
+  border-radius: 3px !important;
+  color: var(--ff-gold) !important;
+  box-shadow: 0 2px 0 rgba(3, 6, 22, 0.5) !important;
+}
+html[data-tema="final-fantasy"] button[aria-label*="stop" i]::after {
+  content: none !important;
+}
+html[data-tema="final-fantasy"] button[aria-label*="stop" i] > * {
+  opacity: 1 !important;
+}
+
+/* ------------------------------------------------------------ the party */
+
+/* runtime.js injects .ff-party (four clickable members) onto the composer
+   pill; all sizing/pose maths derives from the generated strip metrics. */
+html[data-tema="final-fantasy"] .ff-party {
+  position: absolute;
+  right: 16px;
+  top: calc(var(--ff-art-party-cell-h) * -2px);
+  display: flex;
+  gap: 6px;
+  z-index: 40;
+  pointer-events: none;
+}
+
+html[data-tema="final-fantasy"] .ff-party-member {
+  width: calc(var(--ff-art-party-cell-w) * 2px);
+  height: calc(var(--ff-art-party-cell-h) * 2px);
+  background-repeat: no-repeat;
+  background-size: calc(var(--ff-art-party-poses) * 100%) 100%;
+  image-rendering: pixelated;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 2px 0 rgba(3, 6, 22, 0.5));
+  background-position-x: calc(var(--pose, 0) / (var(--ff-art-party-poses) - 1) * 100%);
+}
+
+html[data-tema="final-fantasy"] .ff-party-member[data-member="0"] { background-image: var(--ff-art-party-0); }
+html[data-tema="final-fantasy"] .ff-party-member[data-member="1"] { background-image: var(--ff-art-party-1); }
+html[data-tema="final-fantasy"] .ff-party-member[data-member="2"] { background-image: var(--ff-art-party-2); }
+html[data-tema="final-fantasy"] .ff-party-member[data-member="3"] { background-image: var(--ff-art-party-3); }
+
+@keyframes ff-member-idle {
+  0%, 49.99% { background-position-x: 0%; }
+  50%, 100%  { background-position-x: calc(1 / (var(--ff-art-party-poses) - 1) * 100%); }
+}
+
+/* The party idles while Gemini is working. Driven by the same JS-stamped
+   data-tema-working the moogle rides — one "busy" definition for everything. */
+html[data-tema="final-fantasy"]:has([data-tema-working]) .ff-party-member[data-pose="idle"] {
+  animation-name: ff-member-idle;
+  animation-duration: 0.92s;
+  animation-timing-function: steps(1);
+  animation-iteration-count: infinite;
+  animation-delay: var(--party-phase, 0s);
+}
+
+html[data-tema="final-fantasy"] .ff-party-member[data-member="1"] { --party-phase: 0.23s; }
+html[data-tema="final-fantasy"] .ff-party-member[data-member="2"] { --party-phase: 0.46s; }
+html[data-tema="final-fantasy"] .ff-party-member[data-member="3"] { --party-phase: 0.69s; }
+
+html[data-tema="final-fantasy"] .ff-party-member:hover {
+  filter: drop-shadow(0 2px 0 rgba(3, 6, 22, 0.5)) brightness(1.18);
+}
+
+/* On the fresh-chat view the zero-state greeting sits directly above the
+   composer and can run through the leftmost members — those two kneel
+   (strip pose 4) until a conversation starts. modular-zero-state exists only
+   on the empty view; clicks and chocobo falls still override via data-pose. */
+html[data-tema="final-fantasy"]:has(modular-zero-state) .ff-party-member[data-member="0"][data-pose="idle"],
+html[data-tema="final-fantasy"]:has(modular-zero-state) .ff-party-member[data-member="1"][data-pose="idle"] {
+  animation: none !important;
+  background-position-x: calc(4 / (var(--ff-art-party-poses) - 1) * 100%);
+}
+
+@media (max-width: 720px) {
+  html[data-tema="final-fantasy"] .ff-party { display: none; }
+}
+
+/* ---------------------------------------------------------- working Mog */
+
+/* Gemini's own "working" tell is the sparkle avatar spinning beside the
+   reply; Mog takes the post instead. The page signals stamp data-tema-working on
+   the newest model-response for the whole run, and data-tema-latest survives
+   after it — Mog is a permanent resident under the newest reply, hopping
+   only while Gemini works, exactly like the ChatGPT port. */
+@keyframes ff-moogle-frames {
+  0%, 49.99% { background-position-x: 0%; }
+  50%, 100%  { background-position-x: 100%; }
+}
+
+@keyframes ff-moogle-hop {
+  0%, 100% { transform: translateY(0); }
+  42%      { transform: translateY(-3px); }
+}
+
+html[data-tema="final-fantasy"] model-response[data-tema-latest] .response-container,
+html[data-tema="final-fantasy"] model-response[data-tema-working] .response-container {
+  position: relative;
+}
+
+html[data-tema="final-fantasy"] model-response[data-tema-latest] .response-container::after,
+html[data-tema="final-fantasy"] model-response[data-tema-working] .response-container::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: calc(100% + 6px);
+  width: calc(var(--ff-art-moogle-w) * 1.5px);
+  height: calc(var(--ff-art-moogle-h) * 1.5px);
+  background-image: var(--ff-art-moogle);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 2;
+}
+
+html[data-tema="final-fantasy"] model-response[data-tema-working] .response-container::after {
+  animation:
+    ff-moogle-frames 0.62s steps(1) infinite,
+    ff-moogle-hop 0.62s ease-in-out infinite;
+}
+
+/* While a new turn is mid-run it owns the only Mog — the previous reply's
+   parked one stands down so he never doubles. */
+html[data-tema="final-fantasy"]:has(model-response[data-tema-working]) model-response[data-tema-latest]:not([data-tema-working]) .response-container::after {
+  content: none;
+}
+
+/* ----------------------------------------------------------- the sidebar */
+
+/* The whole column is one tall menu panel: gradient sky-glass, white keyline
+   on the content edge, hard drop. Inner surfaces were made transparent by the
+   token block. */
+html[data-tema="final-fantasy"] bard-sidenav {
+  background-image: linear-gradient(180deg,
+    hsl(228 60% 17%) 0%,
+    hsl(233 64% 11%) 100%) !important;
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  border-right: 2px solid var(--ff-frame) !important;
+  box-shadow:
+    2px 0 0 var(--ff-bevel),
+    4px 0 0 var(--ff-drop),
+    6px 0 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+html[data-tema="final-fantasy"] side-navigation-content,
+html[data-tema="final-fantasy"] side-navigation-content .overflow-container {
+  background: transparent !important;
+}
+
+/* Sidebar rows: menu entries. Gold on hover, with the blinking select hand. */
+@keyframes ff-cursor-blink {
+  0%, 60%   { opacity: 1; }
+  61%, 100% { opacity: 0.35; }
+}
+
+html[data-tema="final-fantasy"] gem-nav-list-item,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/app"],
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook"] {
+  position: relative;
+  overflow: visible !important;
+}
+
+html[data-tema="final-fantasy"] side-navigation-content a:not([href^="http"])::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  margin-top: calc(var(--ff-art-cursor-h) * -0.5px);
+  height: calc(var(--ff-art-cursor-h) * 1px);
+  width: calc(var(--ff-art-cursor-w) * 1px);
+  background: var(--ff-art-cursor) center / contain no-repeat;
+  image-rendering: pixelated;
+  opacity: 0;
+  transition: opacity 90ms linear;
+  pointer-events: none;
+  z-index: 2;
+}
+
+html[data-tema="final-fantasy"] side-navigation-content a:not([href^="http"]):hover::before {
+  opacity: 1;
+  animation: ff-cursor-blink 0.9s steps(1) infinite;
+}
+
+html[data-tema="final-fantasy"] side-navigation-content a:hover,
+html[data-tema="final-fantasy"] side-navigation-content a:hover * {
+  color: var(--ff-gold) !important;
+}
+
+/* The ACTIVE row (current page / open conversation): Gemini paints it as a
+   flat #171717 pill, which read as an unthemed hole. Here it is the cursor
+   row of a JRPG menu — crystal-blue wash, thin white ring, and the same
+   soft glow the breathing windows wear, gently pulsing. */
+@keyframes ff-row-glow {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(196, 220, 255, 0.85),
+      0 0 8px 1px rgba(134, 202, 255, 0.4),
+      0 1px 0 rgba(3, 6, 22, 0.5);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(226, 240, 255, 0.95),
+      0 0 14px 3px rgba(139, 234, 255, 0.6),
+      0 1px 0 rgba(3, 6, 22, 0.5);
+  }
+}
+
+html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item.is-active,
+html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item[aria-current="page"] {
+  background: linear-gradient(180deg, rgba(139, 234, 255, 0.3), rgba(92, 152, 255, 0.14)) !important;
+  border-radius: 5px !important;
+  animation: ff-row-glow 3.2s ease-in-out infinite;
+}
+html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item.is-active,
+html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item.is-active *,
+html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item[aria-current="page"],
+html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item[aria-current="page"] * {
+  color: #ffffff !important;
+}
+
+/* The trailing "More options" affordance on chat rows keeps just its arrow:
+   the Material state layer that used to draw a grey disc goes gold-wash so
+   hover feedback survives without the stock circle. */
+html[data-tema="final-fantasy"] side-navigation-content gem-icon-button button {
+  background: transparent !important;
+}
+html[data-tema="final-fantasy"] side-navigation-content gem-icon-button button .mat-mdc-button-persistent-ripple::before {
+  background: rgba(255, 215, 94, 0.35) !important;
+}
+
+/* --------------------------------------------------- sidebar icon remaps */
+
+/* Gemini's sidebar icons are mat-icon font ligatures, so rows are keyed by
+   their link hrefs — the stable part of the markup. The stock glyph is
+   hidden (color, not display: the slot's size is load-bearing) and the item
+   sprite draws over it. */
+html[data-tema="final-fantasy"] side-navigation-content a[href="/app"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/search"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/images"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/videos"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/library"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href="library"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/gems"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/create"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook/"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon {
+  position: relative;
+  color: transparent !important;
+}
+
+html[data-tema="final-fantasy"] side-navigation-content a[href="/app"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/search"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/images"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/videos"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/library"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href="library"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/gems"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/create"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook/"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 20px;
+  height: 20px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* New chat — the palette coin, as on the other sites. Search — the sparkle
+   star. Images — the brush. Videos — the bolt. Library — the loot bag.
+   Gems — the crystal, naturally. Notebooks: create gets the artifact quill,
+   each notebook the tome, the index the travelling case. */
+html[data-tema="final-fantasy"] side-navigation-content a[href="/app"] mat-icon::after { background-image: var(--ff-art-nav-0); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/search"] mat-icon::after { background-image: var(--ff-art-shop-icon-star); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/images"] mat-icon::after { background-image: var(--ff-art-tray-0); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/videos"] mat-icon::after { background-image: var(--ff-art-shop-icon-bolt); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/library"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href="library"] mat-icon::after { background-image: var(--ff-art-shop-icon-bag); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/gems"] mat-icon::after { background-image: var(--ff-art-menu-crystal); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/create"] mat-icon::after { background-image: var(--ff-art-nav-3); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook/"] mat-icon::after { background-image: var(--ff-art-nav-2); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon::after { background-image: var(--ff-art-nav-5); }
+
+/* Recent chats (a[href^="/app/<id>"] — note the trailing path segment, which
+   "/app" itself lacks) read as the party's equipment: the same eight icons
+   claude's Recents cycle through. Their rows have no icon slot of their own,
+   so the sprite sits in the leading gutter the hover hand also uses — the
+   hand wins while hovered. */
+html[data-tema="final-fantasy"] side-navigation-content .conversation-items-container,
+html[data-tema="final-fantasy"] side-navigation-content [class*="conversation"] {
+  overflow: visible;
+}
+
+/* ------------------------------------------------- sidebar section boxes */
+
+/* Three menu windows, sized by their content: the fixed pair (New chat +
+   Search chats, div.top-action-list's nav list), the scrolling quartet
+   (Images…Gems, .top-action-list-scrollable), and the Notebooks section
+   (an <expandable-section> holding /notebook links). They are separate
+   containers in the DOM — the quartet lives inside the infinite-scroller —
+   so each gets its own complete frame rather than a seamed one that would
+   tear when the list scrolls. Recent stays open, as Chats does on the
+   other sites. */
+html[data-tema="final-fantasy"] side-navigation-content div.top-action-list mat-nav-list:not([class*="removed"]),
+html[data-tema="final-fantasy"] side-navigation-content mat-nav-list.top-action-list-scrollable,
+html[data-tema="final-fantasy"] side-navigation-content expandable-section:has(a[href^="/notebook"]) {
+  display: block;
+  background: rgba(13, 20, 70, 0.42) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  margin: 2px 8px 10px !important;
+  padding: 3px 4px !important;
+}
+
+/* Every sidebar row wears the pixel face — the rows re-declare Google Sans
+   on their own spans (gds-* classes), so the family is stated on the
+   descendants too. Icon ligatures opt out or they would spell their names. */
+html[data-tema="final-fantasy"] side-navigation-content a,
+html[data-tema="final-fantasy"] side-navigation-content button,
+html[data-tema="final-fantasy"] side-navigation-content a span:not(mat-icon):not([class*="lumi"]):not([class*="symbols"]),
+html[data-tema="final-fantasy"] side-navigation-content button span:not(mat-icon):not([class*="lumi"]):not([class*="symbols"]):not(.mat-mdc-button-persistent-ripple),
+html[data-tema="final-fantasy"] side-navigation-content [class*="gds-body"]:not(mat-icon),
+html[data-tema="final-fantasy"] side-navigation-content [class*="gds-label"]:not(mat-icon),
+html[data-tema="final-fantasy"] sidenav-mavatar-footer,
+html[data-tema="final-fantasy"] sidenav-mavatar-footer span:not(mat-icon):not([class*="lumi"]) {
+  font-family: var(--ff-pixel-ui) !important;
+}
+
+/* ------------------------------------------------- collapsed rail (52px) */
+
+/* Collapsing the sidebar (bard-sidenav gains .collapsed) swaps the layout
+   out from under the boxes: a separate icon-only list
+   (.top-action-list-pinned) un-hides, the expanded lists go
+   visibility:hidden but KEEP their layout slot, and every anchor (32px)
+   overflows its 24px wrapper. Boxes drawn there frame nothing and clip
+   everything — so in the rail they stand down entirely and the icons stand
+   alone, like the stock rail does. */
+html[data-tema="final-fantasy"] bard-sidenav.collapsed.collapsed side-navigation-content div.top-action-list mat-nav-list,
+html[data-tema="final-fantasy"] bard-sidenav.collapsed.collapsed side-navigation-content mat-nav-list.top-action-list-scrollable,
+html[data-tema="final-fantasy"] bard-sidenav.collapsed.collapsed side-navigation-content expandable-section {
+  background: transparent !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* No room for the hover hand in a 52px rail; row highlights carry hover. */
+html[data-tema="final-fantasy"] bard-sidenav.collapsed side-navigation-content a::before {
+  content: none !important;
+}
+
+/* The collapsed-only Chat/Spark toggle (stock glyph: toggle_off) wears the
+   halo — the one ring-shaped sprite in the set, and unused on this site. */
+html[data-tema="final-fantasy"] bard-sidenav.collapsed .collapsed-button-wrapper mat-icon {
+  position: relative;
+  color: transparent !important;
+}
+html[data-tema="final-fantasy"] bard-sidenav.collapsed .collapsed-button-wrapper mat-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 20px;
+  height: 20px;
+  background: var(--ff-art-shop-icon-halo) center / contain no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* The footer window slims to rail width; its row stacks and centres. */
+html[data-tema="final-fantasy"] bard-sidenav.collapsed sidenav-mavatar-footer {
+  margin: 4px 2px 6px !important;
+}
+html[data-tema="final-fantasy"] bard-sidenav.collapsed sidenav-mavatar-footer .mavatar-footer-row {
+  justify-content: center;
+}
+
+/* Section labels (Notebooks / Recent) as small gold menu headers. */
+html[data-tema="final-fantasy"] side-navigation-content h1,
+html[data-tema="final-fantasy"] side-navigation-content h2,
+html[data-tema="final-fantasy"] side-navigation-content h3,
+html[data-tema="final-fantasy"] side-navigation-content .title,
+html[data-tema="final-fantasy"] side-navigation-content .expandable-section-title,
+html[data-tema="final-fantasy"] side-navigation-content [class*="section-title"] {
+  font-family: var(--ff-pixel-ui) !important;
+  color: var(--ff-gold) !important;
+  letter-spacing: 0.04em;
+}
+
+/* The Chat/Spark segmented toggle at the top of the sidebar: a little
+   two-tab menu window. Active tab = .app-tab--active (no aria state). */
+html[data-tema="final-fantasy"] mode-switcher-toggle .app-tabs {
+  background: rgba(7, 11, 42, 0.55) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: inset 0 0 0 1px rgba(3, 6, 22, 0.5);
+  padding: 3px !important;
+}
+
+html[data-tema="final-fantasy"] mode-switcher-toggle button.app-tab {
+  font-family: var(--ff-pixel-ui) !important;
+  color: #dbe4ff !important;
+  background: transparent !important;
+  border-radius: 4px !important;
+  border: 0 !important;
+}
+
+html[data-tema="final-fantasy"] mode-switcher-toggle button.app-tab:hover {
+  color: var(--ff-gold) !important;
+  background: rgba(255, 215, 94, 0.12) !important;
+}
+
+html[data-tema="final-fantasy"] mode-switcher-toggle button.app-tab.app-tab--active {
+  background: linear-gradient(180deg, #ffe58f 0%, #ffd75e 55%, #e2b83a 100%) !important;
+  color: #241c04 !important;
+  box-shadow: 0 1px 0 rgba(3, 6, 22, 0.6);
+}
+html[data-tema="final-fantasy"] mode-switcher-toggle button.app-tab.app-tab--active * {
+  color: #241c04 !important;
+}
+
+/* The "Gemini" wordmark link above it keeps the pixel face. */
+html[data-tema="final-fantasy"] side-nav-sparkle-button a,
+html[data-tema="final-fantasy"] side-nav-sparkle-button .gemini-sidenav-text {
+  font-family: var(--ff-pixel-ui) !important;
+  color: #fff !important;
+}
+
+/* The profile / settings footer becomes its own little window, like the
+   other sites' footer rows. */
+html[data-tema="final-fantasy"] sidenav-mavatar-footer {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 6px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  margin: 4px 8px 8px !important;
+}
+html[data-tema="final-fantasy"] sidenav-mavatar-footer .mavatar-footer-row {
+  background: transparent !important;
+}
+
+/* The footer's settings gear becomes the menu crystal, as on the other two
+   sites' profile rows. Width derives from the asset's own aspect so a
+   re-rip never squashes it; the glyph hides by colour — the slot's size is
+   load-bearing. */
+html[data-tema="final-fantasy"] sidenav-mavatar-footer gem-icon-button mat-icon,
+html[data-tema="final-fantasy"] [data-test-id="mavatar-footer-settings-button"] mat-icon {
+  position: relative;
+  color: transparent !important;
+}
+html[data-tema="final-fantasy"] sidenav-mavatar-footer gem-icon-button mat-icon::after,
+html[data-tema="final-fantasy"] [data-test-id="mavatar-footer-settings-button"] mat-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  height: 22px;
+  width: calc(22px * var(--ff-art-menu-crystal-w) / var(--ff-art-menu-crystal-h));
+  background: var(--ff-art-menu-crystal) center / contain no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(139, 234, 255, 0.45));
+}
+
+/* ---------------------------------------------------------------- header */
+
+/* The top bar: wordmark + actions float on the sky; chips get glass. */
+html[data-tema="final-fantasy"] top-bar-actions,
+html[data-tema="final-fantasy"] .top-bar-actions {
+  background: transparent !important;
+}
+
+html[data-tema="final-fantasy"] top-bar-actions button,
+html[data-tema="final-fantasy"] top-bar-actions gem-button {
+  font-family: var(--ff-pixel-ui) !important;
+}
+
+html[data-tema="final-fantasy"] top-bar-actions button:hover,
+html[data-tema="final-fantasy"] top-bar-actions button:hover mat-icon {
+  color: var(--ff-gold) !important;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+/* Filled/tonal Material buttons as the gold and blue menu buttons. */
+html[data-tema="final-fantasy"] .mdc-button--unelevated,
+html[data-tema="final-fantasy"] .mat-mdc-unelevated-button,
+html[data-tema="final-fantasy"] .mat-primary.mat-mdc-raised-button {
+  background: linear-gradient(180deg, #ffe58f 0%, #ffd75e 55%, #e2b83a 100%) !important;
+  color: #241c04 !important;
+  border: 2px solid #fff !important;
+  border-radius: 5px !important;
+  box-shadow: 0 2px 0 var(--ff-drop) !important;
+  font-family: var(--ff-pixel-ui) !important;
+}
+
+html[data-tema="final-fantasy"] .mat-mdc-outlined-button,
+html[data-tema="final-fantasy"] .mdc-button--outlined {
+  background: linear-gradient(180deg, rgba(84, 114, 214, 0.55), rgba(18, 30, 92, 0.55)) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: 5px !important;
+  box-shadow: 0 2px 0 var(--ff-drop) !important;
+  font-family: var(--ff-pixel-ui) !important;
+}
+
+html[data-tema="final-fantasy"] .mdc-button--unelevated:hover,
+html[data-tema="final-fantasy"] .mat-mdc-unelevated-button:hover,
+html[data-tema="final-fantasy"] .mat-mdc-outlined-button:hover {
+  filter: brightness(1.12);
+}
+
+/* Focus ring in gold, matching the other sites' controls. */
+html[data-tema="final-fantasy"] button:focus-visible,
+html[data-tema="final-fantasy"] a:focus-visible {
+  outline: 2px solid var(--ff-gold) !important;
+  outline-offset: 2px !important;
+}
+
+html[data-tema="final-fantasy"] rich-textarea .ql-editor:focus,
+html[data-tema="final-fantasy"] rich-textarea .ql-editor:focus-visible {
+  outline: none !important;
+}
+
+/* Scrollbar as a menu slider: white rail, gold thumb. Inside the composer
+   pill the editor's own scroller must NOT wear it — a 9px gold thumb next
+   to the caret read as a mystery gold block — so the pill hides its
+   scrollbars entirely, like Gemini's own UI does. */
+html[data-tema="final-fantasy"] input-area-v2 ::-webkit-scrollbar,
+html[data-tema="final-fantasy"] rich-textarea ::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none;
+}
+html[data-tema="final-fantasy"] rich-textarea .ql-editor {
+  scrollbar-width: none;
+}
+html[data-tema="final-fantasy"] ::-webkit-scrollbar { width: 9px; height: 9px; }
+html[data-tema="final-fantasy"] ::-webkit-scrollbar-thumb {
+  background: var(--ff-gold) !important;
+  border-radius: 2px !important;
+  box-shadow: inset 0 0 0 1px rgba(3, 6, 22, 0.5);
+}
+html[data-tema="final-fantasy"] ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ------------------------------------------- optional: colourful text */
+
+/* Gated on the per-theme toggle (the theme's settings in the popup → data-tema-opt). Gold emphasis,
+   cyan italics, magenta headings, green inline code, gold list markers. */
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown strong,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown b {
+  color: var(--ff-gold) !important;
+  text-shadow: 1px 1px 0 rgba(3, 6, 22, 0.8);
+}
+
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown em,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown i {
+  color: var(--ff-crystal-cyan) !important;
+  font-style: italic !important;
+}
+
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown h1,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown h2,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown h3,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown h4 {
+  color: #ff8ad8 !important;
+  text-shadow: 1px 1px 0 rgba(3, 6, 22, 0.85);
+}
+
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown code:not(pre code) {
+  color: #7ce8a4 !important;
+}
+
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown a {
+  color: #9db4ff !important;
+  text-decoration-color: rgba(157, 180, 255, 0.5) !important;
+}
+
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .markdown li::marker {
+  color: var(--ff-gold) !important;
+}
+
+/* -------------------------------------------------------------- chocobo */
+
+@keyframes ff-choco-gait {
+  0%, 49.99% { background-position-x: 0%; }
+  50%, 100%  { background-position-x: 100%; }
+}
+
+html[data-tema="final-fantasy"] .ff-choco {
+  position: absolute;
+  width: calc(var(--ff-art-choco-w) * 2px);
+  height: calc(var(--ff-art-choco-h) * 2px);
+  background-image: var(--ff-art-choco);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* Variant A — the parkour. Trajectory measured and driven by runtime.js via
+   WAAPI; these wrappers only set the stage. Box bird crosses at z 39, one
+   layer behind the party (40). */
+html[data-tema="final-fantasy"] .ff-choco-a {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--ff-art-choco-w) * 2px);
+  height: calc(var(--ff-art-choco-h) * 2px);
+  z-index: 39;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 2px 0 rgba(3, 6, 22, 0.5));
+}
+
+html[data-tema="final-fantasy"] .ff-choco-a .ff-choco,
+html[data-tema="final-fantasy"] .ff-choco-sky .ff-choco {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(-1);
+  animation: ff-choco-gait 0.22s steps(1) infinite;
+}
+
+/* Ground + leap segments: fixed on <body>, immune to ancestor clipping,
+   one notch under the starfields. */
+html[data-tema="final-fantasy"] .ff-choco-sky {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: calc(var(--ff-art-choco-w) * 2px);
+  height: calc(var(--ff-art-choco-h) * 2px);
+  z-index: 2147483643;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 2px 0 rgba(3, 6, 22, 0.5));
+}
+
+/* Variants B/C — behind the composer's text, revealed edge-first. runtime.js
+   mounts the clip on the composer host; the pill's z-index:0 (granted above)
+   makes the z:-1 wrapper paint above the window fill, under the text. */
+html[data-tema="final-fantasy"] .ff-choco-clip {
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  right: 8px;
+  height: calc(var(--ff-art-choco-h) * 2px);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes ff-choco-run-b {
+  from { transform: translateX(var(--choco-dist, 800px)); }
+  to   { transform: translateX(calc(var(--ff-art-choco-w) * -2px)); }
+}
+@keyframes ff-choco-run-c {
+  from { transform: translateX(calc(var(--ff-art-choco-w) * -2px)) scaleX(-1); }
+  to   { transform: translateX(var(--choco-dist, 800px)) scaleX(-1); }
+}
+
+html[data-tema="final-fantasy"] .ff-choco-b {
+  animation:
+    ff-choco-gait 0.22s steps(1) infinite,
+    ff-choco-run-b var(--choco-dur, 4.2s) linear forwards;
+}
+html[data-tema="final-fantasy"] .ff-choco-c {
+  animation:
+    ff-choco-gait 0.22s steps(1) infinite,
+    ff-choco-run-c var(--choco-dur, 4.2s) linear forwards;
+}
+
+/* --------------------------------------------------------------- motion */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-tema="final-fantasy"]::before,
+  html[data-tema="final-fantasy"]::after,
+  html[data-tema="final-fantasy"] body::before,
+  html[data-tema="final-fantasy"] body::after,
+  html[data-tema="final-fantasy"] fieldset.input-area-container,
+  html[data-tema="final-fantasy"] input-container .input-area-container,
+  html[data-tema="final-fantasy"] input-container .input-area-container:has(> chat-spark-toggle)::before,
+  html[data-tema="final-fantasy"] model-response[data-tema-latest][data-tema-reply] .response-container-content,
+  html[data-tema="final-fantasy"] model-response[data-tema-reply] .response-container-content::before,
+  html[data-tema="final-fantasy"] .ff-party-member,
+  html[data-tema="final-fantasy"] .ff-shooting-star,
+  html[data-tema="final-fantasy"] model-response[data-tema-working] .response-container::after,
+  html[data-tema="final-fantasy"] side-navigation-content a:not([href^="http"]):hover::before,
+  html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item.is-active,
+  html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item[aria-current="page"] {
+    animation: none !important;
+  }
+  html[data-tema="final-fantasy"] .ff-choco,
+  html[data-tema="final-fantasy"] .ff-choco-clip,
+  html[data-tema="final-fantasy"] .ff-choco-sky {
+    display: none;
+  }
+}

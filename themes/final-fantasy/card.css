@@ -1,0 +1,131 @@
+/* Tema / Final Fantasy — the theme's card in the popup.
+   A night sky, the moon, and the party standing on a menu window, drawn from
+   the same generated sprites the sites use (theme.json "styles" are loaded
+   into the popup too). Everything is scoped to this theme's card. */
+
+.card[data-theme="final-fantasy"] .art { background: #0b1240; }
+
+.card[data-theme="final-fantasy"] .ff-card {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+    hsl(226 62% 26%) 0%,
+    hsl(230 64% 18%) 38%,
+    hsl(233 66% 12%) 72%,
+    hsl(234 66% 9%) 100%);
+}
+
+.card[data-theme="final-fantasy"] .ff-card-stars {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+  background-size: 210px 230px;
+  image-rendering: pixelated;
+}
+.card[data-theme="final-fantasy"] .ff-card-far {
+  background-image: var(--ff-art-stars-far);
+  opacity: 0.55;
+}
+.card[data-theme="final-fantasy"] .ff-card-near {
+  background-image: var(--ff-art-stars-near);
+  background-position: 37px 11px;
+  animation: ffcard-twinkle 4.6s ease-in-out infinite;
+}
+
+.card[data-theme="final-fantasy"] .ff-card-moon {
+  position: absolute;
+  left: 4px;
+  top: -6px;
+  width: 64px;
+  height: 64px;
+  background: var(--ff-art-moon) center / contain no-repeat;
+}
+
+/* The party: four 24x26 strips at 2x, idle frames 0 and 1 of 6. */
+.card[data-theme="final-fantasy"] .ff-card-party {
+  position: absolute;
+  right: 18px;
+  bottom: 50px;
+  display: flex;
+  gap: 0;
+}
+.card[data-theme="final-fantasy"] .ff-card-m {
+  width: calc(var(--ff-art-party-cell-w) * 2px);
+  height: calc(var(--ff-art-party-cell-h) * 2px);
+  margin-left: -6px;
+  background-repeat: no-repeat;
+  background-size: calc(var(--ff-art-party-poses) * 100%) 100%;
+  background-position: 0% 0;
+  image-rendering: pixelated;
+  animation: ffcard-idle 1s steps(1) infinite;
+}
+.card[data-theme="final-fantasy"] .ff-card-m:nth-child(1) { background-image: var(--ff-art-party-0); animation-delay: -0.25s; }
+.card[data-theme="final-fantasy"] .ff-card-m:nth-child(2) { background-image: var(--ff-art-party-1); animation-delay: -0.5s; }
+.card[data-theme="final-fantasy"] .ff-card-m:nth-child(3) { background-image: var(--ff-art-party-2); animation-delay: -0.75s; }
+.card[data-theme="final-fantasy"] .ff-card-m:nth-child(4) { background-image: var(--ff-art-party-3); }
+
+/* The menu window they stand on. */
+.card[data-theme="final-fantasy"] .ff-card-window {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  background: linear-gradient(180deg, #2f47a8 0%, #16225e 58%, #0b1240 100%);
+  border: 2px solid #fff;
+  border-radius: 7px;
+  box-shadow:
+    inset 0 0 0 1px rgba(148, 176, 244, 0.55),
+    0 3px 0 rgba(3, 6, 22, 0.72),
+    0 0 18px rgba(92, 152, 255, 0.35);
+}
+
+.card[data-theme="final-fantasy"] .ff-card-crystal {
+  flex: none;
+  width: calc(var(--ff-art-crystal-w) * 2px);
+  height: calc(var(--ff-art-crystal-h) * 2px);
+  margin-top: -2px;
+  background: var(--ff-art-crystal) center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  animation: ffcard-pulse 2.8s ease-in-out infinite;
+}
+
+.card[data-theme="final-fantasy"] .ff-card-line {
+  font-family: "FF Press Start", ui-monospace, monospace;
+  font-size: 8px;
+  line-height: 1;
+  color: #fff;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* The card's own title in the theme's face. */
+.card[data-theme="final-fantasy"] .name-text {
+  font-family: "FF Press Start", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: #ffd75e;
+  text-shadow: 0 2px 0 rgba(3, 6, 22, 0.8);
+}
+
+@keyframes ffcard-idle {
+  0%, 100% { background-position-x: 0%; }
+  50% { background-position-x: calc(100% / (var(--ff-art-party-poses) - 1)); }
+}
+
+@keyframes ffcard-twinkle {
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+  70% { opacity: 0.4; }
+}
+
+@keyframes ffcard-pulse {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(139, 234, 255, 0.5)); }
+  50% { filter: drop-shadow(0 0 7px rgba(139, 234, 255, 0.95)); }
+}

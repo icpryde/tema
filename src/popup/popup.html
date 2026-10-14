@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tema</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img class="logo" src="logo.svg" alt="" width="30" height="30">
+      <div class="brand-text">
+        <h1>Tema <span class="kana" lang="ja">テーマ</span></h1>
+        <p class="sub">Pick a theme, then the sites that wear it.</p>
+      </div>
+    </div>
+    <!-- What each site wears right now; filled by popup.js. -->
+    <ul class="wearing" id="wearing" aria-label="What each site is wearing"></ul>
+  </header>
+
+  <main class="themes" id="themes" aria-label="Themes"></main>
+
+  <footer class="foot">
+    <span id="count"></span>
+    <span>Open tabs change instantly</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../registry.js"></script>
+  <script src="../settings.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

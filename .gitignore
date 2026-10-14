@@ -1,0 +1,17 @@
+.DS_Store
+
+# Release zips go to GitHub Releases, not into git.
+release/
+
+# Scratch pages the browser-driven suites write next to themselves.
+tools/**/.*.html
+*.probe.html
+.scratch/
+
+# Live-DOM reference captures (local only).
+.snapshots/
+
+# Third-party sprite sheets used only by the optional rippers; the
+# generated sprites in themes/*/assets are what ship.
+themes/final-fantasy/art/sprites/PC _ Computer - Final Fantasy (Pixel Remaster) - Playable Characters - Battle Sprites.png
+themes/final-fantasy/art/sprites/PC _ Computer - Final Fantasy VI (Pixel Remaster) - Playable Characters - Mog.png
