@@ -1261,8 +1261,13 @@ html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response:is([
 }
 
 /* While a new turn is mid-run it owns the only Mog — the previous reply's
-   parked one stands down so he never doubles. */
-html[data-tema="final-fantasy"]:has(model-response[data-tema-working], .conversation-container[data-tema-working]) model-response[data-tema-latest]:not([data-tema-working]) .response-container::after {
+   parked one stands down so he never doubles. The stop button counts too:
+   when the new reply mounts, Gemini re-renders its turn and drops the
+   turn's stamp, and for the moment before the next pass stamps the reply
+   nothing is marked working (recorded live 2026-10-14) — the parked Mog
+   flashed back at the old reply. The stop button is up for the whole run. */
+html[data-tema="final-fantasy"]:has(model-response[data-tema-working], .conversation-container[data-tema-working]) model-response[data-tema-latest]:not([data-tema-working]) .response-container::after,
+html[data-tema="final-fantasy"]:has(button[aria-label*="stop" i], .stop-icon, [class*="stop-generating"]) model-response[data-tema-latest]:not([data-tema-working]) .response-container::after {
   content: none;
 }
 

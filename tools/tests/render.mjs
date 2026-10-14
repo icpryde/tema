@@ -1296,6 +1296,18 @@ window.addEventListener("load", () => {
     winLeft: Math.round(win.getBoundingClientRect().left),
     below: Math.round(parseFloat(a.top) - turn.getBoundingClientRect().height),
     parked: getComputedStyle(document.querySelector("#settled .response-container"), "::after").content,
+    // The moment Gemini re-renders the turn: no stamp anywhere, the run
+    // still going (stop button up). Then the run ends.
+    ...(() => {
+      turn.removeAttribute("data-tema-working");
+      const stop = document.createElement("button");
+      stop.setAttribute("aria-label", "Stop response");
+      document.body.append(stop);
+      const gap = getComputedStyle(document.querySelector("#settled .response-container"), "::after").content;
+      stop.remove();
+      const after = getComputedStyle(document.querySelector("#settled .response-container"), "::after").content;
+      return { gap, after };
+    })(),
   });
 });
 </script>
@@ -1307,6 +1319,8 @@ await rm(MW, { force: true });
 g4check("gem4 waiting mog", gw.content === '""' && /ff-moogle-hop/.test(gw.anim) && Math.abs(gw.mogLeft - (gw.winLeft + 2)) <= 1 && gw.below === 6,
   `a turn waiting for its reply has Mog hopping 6px under it at the window's edge (Mog ${gw.mogLeft}, window ${gw.winLeft}, ${gw.below}px below)`);
 g4check("gem4 one mog", gw.parked === "none", `the last reply's parked Mog stands down meanwhile (${gw.parked})`);
+g4check("gem4 no flash", gw.gap === "none" && gw.after === '""',
+  `between stamps, while the stop button is up, he stays down (${gw.gap}); once the run ends he is back (${gw.after})`);
 
 console.log(bad
   ? `\n${bad} check(s) failed`

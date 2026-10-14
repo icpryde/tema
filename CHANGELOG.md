@@ -24,7 +24,8 @@
   each reply in a reading column while the box around it spans the screen,
   and Mog had stayed at that box's far left edge. And for the couple of
   seconds before Gemini starts a reply, he now waits under your new message
-  instead of hopping under the previous reply above it.
+  instead of hopping under the previous reply above it (and no longer
+  flashes back there for a moment when the reply appears).
 - The crystal in a one-line reply sat low, running onto the window's
   bottom border; in a window that short it now centres on the line. Longer
   replies are unchanged.
