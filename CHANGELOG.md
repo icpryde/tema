@@ -1,12 +1,16 @@
 # Changelog
 
-## Unreleased
+## 1.1.1 — 2026-10-14
 
 - Claude: the blue cursor row on New and on the open chat was the
   see-through wash alone, which over the dark sidebar came out a greyer,
   tealer blue than the menu window beside it. Out there it now carries the
   window's own royal blue under the wash; inside the nav window it's
   unchanged.
+- Claude: the card that opens when you hover a chat in the sidebar (its
+  title and when), and Claude's tooltips, were its own dark grey. Both are
+  small menu windows now, royal blue with the white frame and pixel type,
+  as on ChatGPT. Hovering a sidebar row tints it soft blue instead of grey.
 
 ## 1.1.0 — 2026-10-14
 

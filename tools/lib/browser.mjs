@@ -99,6 +99,12 @@ export async function launch({ binary, extPath, args = [] }) {
   // for the error message if it never comes up.
   let stderr = "";
   proc.stderr.on("data", (d) => { stderr = (stderr + d).slice(-4000); });
+  // A test that dies without closing (a throw, a timeout) must not leave a
+  // headless browser running behind it.
+  let exited = false;
+  proc.on("exit", () => { exited = true; });
+  const killOnExit = () => { if (!exited) try { proc.kill("SIGKILL"); } catch { /* gone */ } };
+  process.on("exit", killOnExit);
 
   // The browser writes its debugging port to DevToolsActivePort.
   const portFile = join(profile, "DevToolsActivePort");
@@ -173,9 +179,18 @@ export async function launch({ binary, extPath, args = [] }) {
     return p;
   }
 
+  // Wait for the browser to be gone before removing its profile: removed any
+  // sooner, a browser still shutting down writes into it again, and the
+  // folder (and, after a slow exit, the process) outlived the run.
   async function close() {
     try { await cdp.send("Browser.close"); } catch { /* already gone */ }
-    proc.kill();
+    const gone = () => exited || new Promise((r) => {
+      const t = setTimeout(r, 3000);
+      proc.once("exit", () => { clearTimeout(t); r(); });
+    });
+    await gone();
+    if (!exited) { proc.kill("SIGKILL"); await gone(); }
+    process.off("exit", killOnExit);
     await rm(profile, { recursive: true, force: true }).catch(() => {});
   }
 

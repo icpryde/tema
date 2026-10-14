@@ -253,6 +253,28 @@ html[data-tema="final-fantasy"] [role="listbox"] {
   box-shadow: var(--ff-frame-shadow) !important;
 }
 
+/* The 2026-10 build's popups (Base UI, in a data-cds-portal): the card that
+   opens over a chat row (data-cds="PreviewCard": its title and when) and the
+   plain tooltips (data-cds="Tooltip", a role=tooltip box coloured by
+   --cds-tooltip-bg) were Claude's dark grey. Small menu windows, as on
+   ChatGPT. */
+html[data-tema="final-fantasy"] [data-cds="PreviewCard"],
+html[data-tema="final-fantasy"] [data-cds="Tooltip"] [role="tooltip"] {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 5px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  color: #fff !important;
+}
+html[data-tema="final-fantasy"] [data-cds="PreviewCard"] *,
+html[data-tema="final-fantasy"] [data-cds="Tooltip"] [role="tooltip"] * {
+  font-family: var(--ff-pixel-ui) !important;
+}
+html[data-tema="final-fantasy"] [data-cds="PreviewCard"] .text-secondary,
+html[data-tema="final-fantasy"] [data-cds="PreviewCard"] .text-secondary * {
+  color: hsl(222 45% 80%) !important;
+}
+
 /* Menu rows highlight gold, the way a JRPG cursor row does. */
 html[data-tema="final-fantasy"] [role="menuitem"]:hover,
 html[data-tema="final-fantasy"] [role="option"]:hover {
@@ -629,6 +651,12 @@ html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focuse
   background: linear-gradient(180deg, rgba(139, 234, 255, 0.3), rgba(92, 152, 255, 0.14)) !important;
   border-radius: 5px !important;
   animation: ff-row-glow 3.2s ease-in-out infinite;
+}
+
+/* Hover (and a row whose menu is open) is Claude's --df-hover, 7.5% white:
+   the same grey bar, fainter. In the sidebar it is a soft blue instead. */
+html[data-tema="final-fantasy"] [data-testid="sidebar"] {
+  --df-hover: rgba(108, 146, 255, 0.16) !important;
 }
 
 /* That wash is see-through: inside a menu window (the nav rows) it lifts

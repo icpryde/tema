@@ -225,7 +225,26 @@ const BODY = `
 </div>
 <div data-radix-popper-content-wrapper>
   <div data-side="top" data-align="center" class="px-2 py-1 text-xs font-normal font-ui leading-tight rounded-md shadow-md text-always-white backdrop-blur break-words text-pretty">Copy</div>
-</div>`;
+</div>
+<!-- A sidebar row as it paints on hover: bg-[var(--df-hover)]. -->
+<div data-testid="sidebar"><a data-row-main-button href="#" id="hoverrow" style="display:block;background-color:var(--df-hover, rgba(255,255,255,.075))">A hovered chat</a></div>
+<!-- The 2026-10 build's popups (live markup, 2026-10-14): the card over a
+     chat row, and a plain tooltip. -->
+<div data-base-ui-portal><div data-cds-portal class="cds-root pointer-events-auto">
+  <div data-open data-side="right" data-align="center" role="presentation">
+    <div data-open data-side="right" data-align="center" tabindex="-1" data-cds="PreviewCard" id="previewcard" class="flex flex-col gap-1 rounded-card bg-surface-3 shadow-panel text-body text-primary" style="background-color: rgb(32, 32, 31)">
+      <div class="relative flex min-w-0 flex-col gap-1"><span class="text-body leading-tight" id="previewtitle">Pikachu</span>
+      <span class="text-footnote text-secondary"><time data-cds="RelativeTime" id="previewtime">11h ago</time></span></div>
+    </div>
+  </div>
+</div></div>
+<div data-base-ui-portal><div data-cds-portal class="cds-root pointer-events-auto">
+  <div data-open data-side="top" role="presentation" data-cds="Tooltip">
+    <div data-open data-side="top" tabindex="-1" role="tooltip" id="cdstooltip" class="px-2 bg-[var(--cds-tooltip-bg)] text-[var(--cds-tooltip-fg)] shadow-sm" style="background-color: rgb(32, 32, 31)">
+      <div data-mode="dark" class="cds-dark-scope contents"><span class="min-w-0 break-words">Get apps and extensions</span></div>
+    </div>
+  </div>
+</div></div>`;
 
 // Probes: [label, selector, pseudo|null, properties]
 const PROBES = JSON.stringify([
@@ -253,6 +272,10 @@ const PROBES = JSON.stringify([
   ["recents icon 0", '[data-row-key="chat:0"] .df-leading-slot',        "::after", ["backgroundImage", "width", "height"]],
   ["recents icon 1", '[data-row-key="chat:1"] .df-leading-slot',        "::after", ["backgroundImage"]],
   ["open chat row",  "#openchat",                                       null,      ["backgroundImage", "animationName"]],
+  ["hover row",      "#hoverrow",                                       null,      ["backgroundColor"]],
+  ["preview card",   "#previewcard",                                    null,      ["backgroundImage", "borderTopWidth", "borderTopColor"]],
+  ["preview title",  "#previewtitle",                                   null,      ["fontFamily", "color"]],
+  ["cds tooltip",    "#cdstooltip",                                     null,      ["backgroundImage", "borderTopWidth"]],
   ["nav selected",   "#navselected",                                    null,      ["backgroundImage", "animationName"]],
   ["sidebar frame",  ".dframe-sidebar-body",                            null,      ["borderTopWidth", "borderTopColor", "backgroundColor"]],
   ["scenery",        "main.dframe-content",                             "::before", ["content", "backgroundImage"]],
@@ -430,6 +453,12 @@ const MUST_BE_STYLED = {
   // A selected row is the cursor row, blue as on the other sites; Claude's
   // own --df-selected (15% white, set inline on the open chat here) read
   // as a grey bar. Inside the nav window it's the see-through wash alone.
+  // The card over a chat row and the plain tooltips: menu windows, not
+  // Claude's dark grey (set inline here, as the class would).
+  "hover row":     ["backgroundColor", /^rgba\(108, 146, 255, 0\.16\)$/],
+  "preview card":  ["backgroundImage", /linear-gradient/],
+  "preview title": ["fontFamily", /Silkscreen/],
+  "cds tooltip":   ["backgroundImage", /linear-gradient/],
   "nav selected": ["backgroundImage", /^linear-gradient\(rgba\(139, 234, 255, 0\.3\), rgba\(92, 152, 255, 0\.14\)\)$/],
   "horizon":       ["backgroundSize", /1878px 409px/],
   "cowork tray":   ["backgroundImage", /linear-gradient/],
