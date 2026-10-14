@@ -19,10 +19,24 @@ The first release of Tema.
   itself (Gemini 4 made it a div, which slipped past the old exemption and
   could repaint the message box in a conversation), and it now runs on the
   first pass after the page loads.
+- Gemini 4, continued: reply windows follow its new 708px reading column
+  instead of stretching across the screen; Task mode's suggestions are a
+  command menu with the select hand; the new Scheduled, Customise and More
+  rows have pixel icons; the scroll-to-bottom button is a menu button.
+- The big hand: clicking a Gemini sidebar row left Material's focus layer
+  stretching the row's select hand across the label. Every site's row hand
+  is now pinned to its size and spot.
+- claude.ai's rebuilt sidebar: icons follow the rows' names (Projects,
+  Artifacts, Scheduled, Customize, More), the nav rows are a menu window
+  again, and the new-chat greeting is pixel type once more.
+- ChatGPT: Codex and Images have their own icons, and a sidebar row the
+  theme doesn't know yet gets the star instead of an empty slot.
+- Fonts: claude.ai refuses fonts embedded in stylesheets, which left Claude
+  in fallback type. Tema now also loads a theme's font files itself (the
+  FontFace API), so the pixel fonts load on every site, and the same way in
+  Safari later.
 - Switching a theme off undoes every inline change it made, including
   Gemini's send button.
-- The pixel fonts are embedded in the theme, so they load everywhere (and
-  will in Safari), with no extension URL to resolve.
 - Engine: the page facts themes key on (filled replies, the newest reply,
   "the model is working", claude.ai's icon glyphs, wide tables) are worked out
   once by the engine and shared by every theme. Adding a theme is a folder
