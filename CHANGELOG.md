@@ -16,8 +16,9 @@
   no window, no crystal, no pixel type, no Mog. Replies are menu windows
   again, with the action row (Copy, the thumbs, Retry) outside the window
   as before; your messages are menu windows in the pixel face; and Mog
-  lives under the newest reply as he does on ChatGPT, hopping while Claude
-  thinks and writes. The colourful-text option and the wide-table windows
+  lives under the newest reply as he does on ChatGPT, hopping from the
+  moment you send until Claude's last word, in place of Claude's own clay
+  working mark. The colourful-text option and the wide-table windows
   follow the new page too.
 - Gemini: Mog stands under the reply again. Gemini 4's wide layout centres
   each reply in a reading column while the box around it spans the screen,

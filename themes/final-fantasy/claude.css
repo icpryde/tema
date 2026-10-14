@@ -289,7 +289,8 @@ html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] >
 
 /* Code blocks sit inside the window, so lift them off its fill rather than
    letting two dark panels blur together. */
-html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply] pre {
+html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply] pre,
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] pre {
   background: rgba(4, 8, 30, 0.55) !important;
   border: 1px solid rgba(150, 180, 255, 0.22) !important;
   border-radius: 5px !important;
@@ -303,7 +304,8 @@ html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply] pre {
    reply; the window widens by that much, evenly both ways so its centre
    stays on the column, capped by the room around the column. A table that
    fits is left exactly as claude.ai lays it out. */
-html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply][style*="--tema-grow"] {
+html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply][style*="--tema-grow"],
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply][style*="--tema-grow"] {
   margin-inline: calc(var(--tema-grow) / -2) !important;
   max-width: none !important;
 }
@@ -400,7 +402,7 @@ html[data-tema="final-fantasy"]:not([data-ff-party="dom"])
    generating, which is the cleanest "is Claude thinking" signal in the DOM —
    no JS, no polling. The party animates while any message is streaming and
    settles the moment it stops. */
-html[data-tema="final-fantasy"]:not([data-ff-party="dom"]):has(div[data-is-streaming="true"])
+html[data-tema="final-fantasy"]:not([data-ff-party="dom"]):has(div[data-is-streaming="true"], [data-cds="AssistantMessage"][data-busy])
   div[class*="cursor-text"]:has([data-testid="chat-input"])::before {
   animation-play-state: running;
 }
@@ -455,7 +457,7 @@ html[data-tema="final-fantasy"] .ff-party-member[data-member="3"] { background-i
    animation-* property, which silently zeroed the per-member delays below and
    made all four idle in lockstep. The phase travels in a custom property so it
    survives regardless of rule order. */
-html[data-tema="final-fantasy"]:has(div[data-is-streaming="true"]) .ff-party-member[data-pose="idle"] {
+html[data-tema="final-fantasy"]:has(div[data-is-streaming="true"], [data-cds="AssistantMessage"][data-busy]) .ff-party-member[data-pose="idle"] {
   animation-name: ff-member-idle;
   animation-duration: 0.92s;
   animation-timing-function: steps(1);
@@ -765,10 +767,18 @@ html[data-tema="final-fantasy"] main:has(button[class*="group/status"]:not([data
    the way he lives on chatgpt.com and Gemini: below the action row, level
    with the window's left edge. He stands once the reply is done
    (data-tema-latest) and hops while Claude works (the page signals stamp
-   data-tema-working on the newest reply while it says data-is-streaming=
-   "true", which holds from the moment it mounts, thinking included). A new
-   turn mid-run owns the only Mog, so the last reply's one stands down.
-   Centre-positioned, because ff-moogle-hop above carries the centring. */
+   data-tema-working on the newest reply while it carries data-busy, which
+   holds from the moment you send to the last token). A new turn mid-run
+   owns the only Mog, so the last reply's one stands down. Centre-
+   positioned, because ff-moogle-hop above carries the centring.
+
+   Claude's own working mark sits in the status row's leading slot: the
+   Spark (hidden above) and data-cds="WorkingMark", the clay dot that
+   animates while it works. Mog is the working mark now, so it goes too. */
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"] [data-cds="WorkingMark"] {
+  opacity: 0 !important;
+}
+
 html[data-tema="final-fantasy"] [data-cds="AssistantMessage"]:is([data-tema-latest], [data-tema-working]) {
   position: relative;
 }
@@ -794,7 +804,7 @@ html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-working]
     ff-moogle-hop 0.62s ease-in-out infinite;
 }
 
-html[data-tema="final-fantasy"]:has([data-cds="AssistantMessage"][data-tema-working]) [data-cds="AssistantMessage"][data-tema-latest]:not([data-tema-working])::after {
+html[data-tema="final-fantasy"] main:has([data-cds="AssistantMessage"][data-tema-working]) [data-cds="AssistantMessage"][data-tema-latest]:not([data-tema-working])::after {
   content: none;
 }
 
@@ -1410,7 +1420,7 @@ html[data-tema="final-fantasy"] .ff-shooting-star {
   html[data-tema="final-fantasy"] body::after,
   html[data-tema="final-fantasy"] div[class*="cursor-text"]:has([data-testid="chat-input"]),
   html[data-tema="final-fantasy"] div[class*="cursor-text"]:has([data-testid="chat-input"])::before,
-  html[data-tema="final-fantasy"]:has(div[data-is-streaming="true"])
+  html[data-tema="final-fantasy"]:has(div[data-is-streaming="true"], [data-cds="AssistantMessage"][data-busy])
     div[class*="cursor-text"]:has([data-testid="chat-input"])::before,
   html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-latest],
   html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]::before,

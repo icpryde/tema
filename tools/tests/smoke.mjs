@@ -1219,36 +1219,51 @@ const CLAUDE_CDS_PAGE = `<!doctype html>
     if (!first.hasAttribute("data-tema-latest")) err("the newest reply was not stamped data-tema-latest — Mog has no perch");
     if (first.hasAttribute("data-tema-working")) err("a settled reply was stamped working");
 
-    // A new turn: the reply mounts streaming, thinking first. Its summary
-    // row already holds text (marked data-find-omitted) and its body is
-    // empty, so it must be WORKING but not yet a reply (no window yet).
+    // A new turn, replayed from a live recording (2026-10-14): the reply
+    // mounts with data-busy and NO data-is-streaming, its status row pending
+    // with Claude's working mark; streaming="true" lands ~0.7s later, drops
+    // out again mid-run, and the answer streams into the body.
     const row = document.createElement("div");
     row.setAttribute("data-testid", "transcript-row");
     row.innerHTML =
       '<div role="article"><div data-transcript-row><div data-reply-scope>' +
-      '<div data-cds="AssistantMessage" data-testid="assistant-message" data-turn-key data-is-streaming="true" id="next">' +
+      '<div data-cds="AssistantMessage" data-busy data-testid="assistant-message" data-turn-key id="next">' +
       '<h2 class="sr-only" data-find-omitted>Claude said:</h2>' +
       '<div class="flex min-w-0 flex-col">' +
-      '<div data-cds="TurnStatus" data-find-omitted data-state="thinking"><span>Thinking about moogles</span></div>' +
+      '<div data-cds="TurnStatus" data-pending-status data-find-omitted data-state="pending">' +
+      '<div><span data-cds-row-mark><span data-cds="WorkingMark"><span></span></span></span><span>Crystallizing</span></div></div>' +
       '<div class="min-w-0"><div class="grid"><div data-transcript-engine-root class="contents"></div></div></div>' +
       '</div></div></div></div></div>';
     document.getElementById("feed").append(row);
     const next = document.getElementById("next");
     await wait(600);
-    if (!next.hasAttribute("data-tema-working")) err("a streaming reply was not stamped working — Mog would not hop");
-    if (next.hasAttribute("data-tema-reply")) err("the thinking summary stamped the reply — an empty window would open mid-thinking");
+    if (!next.hasAttribute("data-tema-working")) err("a reply mounted busy (before data-is-streaming) was not stamped working — Mog stays under the last reply");
+    if (next.hasAttribute("data-tema-reply")) err("the pending status row stamped the reply — an empty window would open");
     if (first.hasAttribute("data-tema-working")) err("the previous reply was stamped working");
 
+    next.setAttribute("data-is-streaming", "true");
+    next.querySelector("[data-cds=TurnStatus]").setAttribute("data-state", "busy");
+    await wait(400);
+    next.removeAttribute("data-is-streaming");          // the mid-run drop
+    await wait(600);
+    if (!next.hasAttribute("data-tema-working")) err("working dropped when data-is-streaming did, though the reply was still busy");
+
     // The answer streams into the body.
+    next.setAttribute("data-is-streaming", "true");
     next.querySelector("[data-transcript-engine-root]").innerHTML =
       '<div class="prose"><div class="standard-markdown"><p>Mog.</p></div></div>';
     await wait(600);
     if (!next.hasAttribute("data-tema-reply")) err("streamed answer text did not stamp the reply");
     if (!next.hasAttribute("data-tema-latest") || first.hasAttribute("data-tema-latest")) err("latest did not move to the new reply");
-    if (!next.hasAttribute("data-tema-working")) err("working dropped while the reply still streams");
+    next.removeAttribute("data-is-streaming");           // and again, with text in
+    await wait(600);
+    if (!next.hasAttribute("data-tema-latest")) err("latest fell back to the old reply when data-is-streaming dropped out");
+    if (!next.hasAttribute("data-tema-working")) err("working dropped while the reply was still busy");
 
-    // Done: the stamp holds through the grace window, then clears.
+    // Done: busy and streaming go, both as attribute flips alone. The stamp
+    // holds through the grace window, then clears.
     next.setAttribute("data-is-streaming", "false");
+    next.removeAttribute("data-busy");
     await wait(2400);
     if (next.hasAttribute("data-tema-working")) err("working outlived the run by more than the grace window");
     if (!next.hasAttribute("data-tema-reply") || !next.hasAttribute("data-tema-latest")) err("the finished reply lost its stamps");

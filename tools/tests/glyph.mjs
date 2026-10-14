@@ -71,6 +71,37 @@ const STATES = {
     </div></div>
     ${stripLogo(32)}`,
 
+  // The 2026-10 transcript, recorded live 2026-10-14. Just after you send:
+  // the new reply is mounted busy, before data-is-streaming exists, its
+  // status row pending with the Spark and the clay WorkingMark in its
+  // leading slot; the page signals have stamped it working. The last reply
+  // is still the latest. One Mog, hopping, under the new turn.
+  cdsPending: `
+    <div data-cds="AssistantMessage" data-testid="assistant-message" data-turn-key data-is-streaming="false" data-tema-reply="1" data-tema-latest class="group/message-row relative flex w-full min-w-0 flex-col gap-xs">
+      <div class="flex min-w-0 flex-col"><div data-cds="TurnStatus" data-find-omitted data-state="done" class="group/status flex w-full min-w-0 flex-col"><div><span><span>Figured it out</span></span></div></div>
+      <div class="min-w-0"><div class="grid"><div data-transcript-engine-root class="contents"><div class="prose"><p>The last reply.</p></div></div></div></div></div>
+      <div class="print:mt-xs"><div data-cds="MessageActions" role="toolbar"><button aria-label="Copy">c</button></div></div>
+    </div>
+    <div data-cds="AssistantMessage" data-busy data-tema-working data-testid="assistant-message" data-turn-key class="group/message-row relative flex w-full min-w-0 flex-col gap-xs">
+      <div class="flex min-w-0 flex-col"><div data-cds="TurnStatus" data-pending-status data-find-omitted data-state="pending" class="group/status flex w-full min-w-0 flex-col">
+        <div tabindex="-1" class="flex min-w-0 gap-xs"><span aria-hidden="true" data-cds-row-mark class="relative flex h-[1lh] shrink-0 items-center justify-center w-[20px]">
+          <span class="absolute top-1/2 left-1/2 flex size-icon"><svg data-cds="Spark" width="100%" height="100%" fill="var(--cds-clay, #d97757)" aria-hidden="true" class="shrink-0" viewBox="0 0 100 100"><path d="M50 0 60 40 100 50 60 60 50 100 40 60 0 50 40 40Z"/></svg></span>
+          <span class="absolute inset-0 flex items-center justify-center"><span class="relative flex size-[20px] shrink-0 items-center"><span class="absolute inset-0 opacity-100">
+            <span data-testid="TurnStatusClayMark" aria-hidden="true" data-cds="WorkingMark" class="relative block shrink-0 select-none" style="width:8px;height:8px;color:#d97757"><span class="absolute inset-0 m-auto block rounded-full bg-current" style="position:absolute;inset:0;background:currentColor;border-radius:50%"></span></span>
+          </span></span></span>
+        </span><span class="flex min-w-0 gap-xs items-center">Crystallizing</span></div>
+      </div>
+      <div class="min-w-0"><div class="grid"><div data-transcript-engine-root class="contents"></div></div></div></div>
+    </div>`,
+
+  // The 2026-10 transcript at rest: Mog parked under the newest reply.
+  cdsFinished: `
+    <div data-cds="AssistantMessage" data-testid="assistant-message" data-turn-key data-is-streaming="false" data-tema-reply="1" data-tema-latest class="group/message-row relative flex w-full min-w-0 flex-col gap-xs">
+      <div class="flex min-w-0 flex-col"><div data-cds="TurnStatus" data-find-omitted data-state="done" class="group/status flex w-full min-w-0 flex-col"><div><span><span>Figured it out</span></span></div></div>
+      <div class="min-w-0"><div class="grid"><div data-transcript-engine-root class="contents"><div class="prose"><p>A finished reply.</p></div></div></div></div></div>
+      <div class="print:mt-xs"><div data-cds="MessageActions" role="toolbar"><button aria-label="Copy">c</button></div></div>
+    </div>`,
+
   // Finished: the reply has text, and the status row is now its summary line.
   finished: `
     <div role="article"><div class="contents">
@@ -128,12 +159,13 @@ window.addEventListener("load", () => {
   const out = { _parsedGlyphRules: Object.keys(authored).length };
   for (const state of ${JSON.stringify(Object.keys(STATES))}) {
     const root = document.getElementById(state);
-    const glyphs = [...root.querySelectorAll('svg[data-cds="Spark"], div[class~="text-accent-brand"] svg, div[class~="text-brand-200"] svg')];
+    const glyphs = [...root.querySelectorAll('svg[data-cds="Spark"], [data-cds="WorkingMark"], div[class~="text-accent-brand"] svg, div[class~="text-brand-200"] svg')];
     const moogles = [...root.querySelectorAll("*")].filter(drawsMoogle);
     out[state] = {
       visibleGlyphs: glyphs.filter(visible).length,
       moogles: moogles.length,
       visibleMoogles: moogles.filter(visible).length,
+      hopping: moogles.filter(visible).filter((el) => /ff-moogle-hop/.test(getComputedStyle(el, "::after").animationName)).length,
       where: moogles.filter(visible).map((el) => {
         const a = getComputedStyle(el, "::after");
         return (el.tagName.toLowerCase() + "." +
@@ -180,11 +212,13 @@ for (const [state, r] of Object.entries(res)) {
   // Finished state deliberately shows no moogle on the status row — the crystal
   // is the marker there — but the strip logo under the reply still gets one.
   const wantMoogles = 1;
-  const ok = r.visibleGlyphs === 0 && r.visibleMoogles === wantMoogles;
+  // On the 2026-10 transcript Mog hops while the turn works, and only then.
+  const wantHop = state === "cdsPending" ? 1 : state === "cdsFinished" ? 0 : r.hopping;
+  const ok = r.visibleGlyphs === 0 && r.visibleMoogles === wantMoogles && r.hopping === wantHop;
   if (!ok) bad++;
   console.log(
     `${ok ? "ok  " : "FAIL"} ${state.padEnd(18)} visibleGlyphs=${r.visibleGlyphs} (want 0)  ` +
-    `visibleMoogles=${r.visibleMoogles} (want ${wantMoogles})` +
+    `visibleMoogles=${r.visibleMoogles} (want ${wantMoogles})  hopping=${r.hopping} (want ${wantHop})` +
     (ok ? "" : "\n       drawn on: " + (r.where || []).join("  |  "))
   );
 }

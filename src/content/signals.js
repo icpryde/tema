@@ -22,6 +22,8 @@
   const SITE = T.site;
 
   const REPLY = "temaReply";              // dataset key of data-tema-reply
+  // claude.ai's replies, both builds (see markClaude).
+  const CLAUDE_REPLIES = 'div[data-is-streaming], [data-cds="AssistantMessage"]';
   const LATEST = "data-tema-latest";
   const WORKING = "data-tema-working";
   const GROW = "--tema-grow";
@@ -225,13 +227,15 @@
   }
 
   function markClaude() {
-    // Every reply is a div[data-is-streaming]. Until 2026-10 its body was
-    // .font-claude-response. The rebuilt transcript (2026-10, the "cds"
-    // design system) keeps the attribute on div[data-cds="AssistantMessage"],
-    // which holds the status row (data-cds="TurnStatus", the thinking
-    // summary, marked data-find-omitted), the body ([data-transcript-engine-
-    // root] > .prose) and the action row; the body is the part to read.
-    const msgs = document.querySelectorAll("div[data-is-streaming]");
+    // Every reply was a div[data-is-streaming], its body .font-claude-response.
+    // The rebuilt transcript (2026-10, the "cds" design system) makes it
+    // div[data-cds="AssistantMessage"], holding the status row (data-cds=
+    // "TurnStatus", the thinking summary, marked data-find-omitted), the
+    // body ([data-transcript-engine-root] > .prose) and the action row; the
+    // body is the part to read. data-is-streaming is no longer reliable
+    // there (recorded live 2026-10-14): a new reply mounts without it, gains
+    // "true" about 0.7s later, and can drop it again mid-run.
+    const msgs = document.querySelectorAll(CLAUDE_REPLIES);
     if (want.has("replies")) {
       for (const el of msgs) {
         const body = el.querySelector(".font-claude-response, [data-transcript-engine-root]");
@@ -239,13 +243,13 @@
       }
     }
     // Working: the old build showed it itself (the status row's glyph, which
-    // the theme dresses in CSS alone). The rebuild has no such slot, so the
-    // newest reply is stamped for as long as it says it is streaming; that
-    // attribute holds from the moment the reply mounts, through the
-    // thinking, to the last token. The newest is the last: the rebuild has
+    // the theme dresses in CSS alone). The rebuild's newest reply carries
+    // data-busy from the moment you send until its last token, so it is
+    // stamped for exactly that long. The newest is the last: the rebuild has
     // no empty next-turn placeholder.
-    holdWorking(msgs.length > 0 && msgs[msgs.length - 1].getAttribute("data-is-streaming") === "true",
-      msgs[msgs.length - 1] || null);
+    const last = msgs[msgs.length - 1] || null;
+    holdWorking(!!last && (last.hasAttribute("data-busy") ||
+      last.getAttribute("data-is-streaming") === "true"), last);
   }
 
   /**
@@ -258,7 +262,7 @@
       SITE === "gemini" ? "model-response[data-tema-reply]"
       : SITE === "chatgpt"
         ? 'section[data-turn="assistant"][data-tema-reply], [data-chatgpt-search-unit-key][data-tema-reply]'
-        : "div[data-is-streaming][data-tema-reply]");
+        : 'div[data-is-streaming][data-tema-reply], [data-cds="AssistantMessage"][data-tema-reply]');
     const last = replies[replies.length - 1] || null;
     for (const el of document.querySelectorAll("[" + LATEST + "]")) {
       if (el !== last) el.removeAttribute(LATEST);
@@ -377,7 +381,8 @@
 
   function syncWide() {
     if (SITE !== "claude") return;
-    for (const win of document.querySelectorAll("div[data-is-streaming][data-tema-reply]")) {
+    for (const win of document.querySelectorAll(
+      'div[data-is-streaming][data-tema-reply], [data-cds="AssistantMessage"][data-tema-reply]')) {
       const cur = parseFloat(win.style.getPropertyValue(GROW)) || 0;
       const frame = frameOf(win);
       let need = 0;
@@ -432,10 +437,11 @@
 
   /* ------------------------------------------------------------ wiring */
 
-  // claude.ai says a reply is done by flipping data-is-streaming on it, and
-  // the engine's observer only watches the tree, so a run whose last change
-  // was that flip left the working stamp up until something else moved.
-  // This one watches that attribute alone.
+  // claude.ai says a reply is done by flipping attributes on it
+  // (data-is-streaming, and data-busy on the 2026-10 build), and the
+  // engine's observer only watches the tree, so a run whose last change was
+  // that flip left the working stamp up until something else moved. This
+  // one watches those attributes alone.
   const streamWatch = new MutationObserver(() => T.schedule());
 
   T.useEngine({
@@ -443,7 +449,7 @@
       want = new Set(ctx.theme.signals || []);
       if (want.has("working") && SITE === "claude") {
         streamWatch.observe(document.documentElement,
-          { attributes: true, attributeFilter: ["data-is-streaming"], subtree: true });
+          { attributes: true, attributeFilter: ["data-is-streaming", "data-busy"], subtree: true });
       }
       if (want.has("icons")) markIcons(document.documentElement);
       if (want.has("wide-tables") && SITE === "claude" && document.fonts) {

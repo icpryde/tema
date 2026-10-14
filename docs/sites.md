@@ -26,8 +26,12 @@ carry the detail beside each rule; this is the map.
   (`data-cds="MessageActions"`). The window frames the content column. Your
   turn is `div[data-cds="UserMessage"]`: the bubble is its child holding
   `[data-testid="user-message"]`, beside its own action row. There is no
-  next-turn placeholder and no working glyph; `data-is-streaming="true"`
-  holds for the whole run, and the `working` signal follows it.
+  next-turn placeholder. A new reply mounts with `data-busy` and no
+  `data-is-streaming` (its status row `data-state=pending`), gains
+  `data-is-streaming="true"` about 0.7s later, can drop it again mid-run,
+  and loses `data-busy` with its last token: `data-busy` is the working
+  signal. The status row's leading slot holds the Spark and
+  `data-cds="WorkingMark"` (the clay dot) while it works.
 - The working glyph is `svg[data-cds="Spark"]` (and a sprite-strip logo);
   a `:has()` nested in a `:has()` is invalid CSS and drops the whole rule
   silently — `tools/tests/glyph.mjs` counts parsed rules for that reason.
