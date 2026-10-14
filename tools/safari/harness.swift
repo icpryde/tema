@@ -31,6 +31,7 @@
 //   {"id":5,"cmd":"errors"}                                            the extension context's errors
 //   {"id":6,"cmd":"prompts"}                                           permission prompts seen so far
 //   {"id":7,"cmd":"answer","grant":false}                              how to answer the next prompts
+//   {"id":9,"cmd":"snapshot","tab":"claude","path":"/…/shot.png"}      a PNG of what the tab shows
 //   {"id":8,"cmd":"quit"}
 
 import AppKit
@@ -278,6 +279,16 @@ func handle(_ line: String, _ harness: Harness) async {
             reply(["id": id, "ok": true, "value": harness.prompts])
         case "answer":
             harness.grantPrompts = cmd["grant"] as? Bool ?? true
+            reply(["id": id, "ok": true])
+        case "snapshot":
+            guard let view = harness.views[cmd["tab"] as? String ?? ""] else { throw HarnessError("no such tab") }
+            if let w = cmd["width"] as? Double, let h = cmd["height"] as? Double {
+                view.frame = NSRect(x: 0, y: 0, width: w, height: h)
+            }
+            let image = try await view.takeSnapshot(configuration: nil)
+            guard let tiff = image.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
+                  let png = rep.representation(using: .png, properties: [:]) else { throw HarnessError("no image") }
+            try png.write(to: URL(fileURLWithPath: cmd["path"] as? String ?? ""))
             reply(["id": id, "ok": true])
         case "quit":
             reply(["id": id, "ok": true])

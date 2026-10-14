@@ -154,6 +154,15 @@ try {
   const notice = () => evalIn("popup", `const el = document.getElementById("access");
     return { shown: !el.hidden, text: el.textContent }`);
 
+  const claude = () => evalIn("claude", `return {
+      theme: document.documentElement.getAttribute("data-tema"),
+      party: document.querySelectorAll(".ff-party-member").length,
+      adopted: document.adoptedStyleSheets.length }`);
+  await call({ cmd: "open", tab: "claude", url: "https://claude.ai/" });
+  const shut = await claude();
+  check(shut.adopted === 0 && shut.theme === null, "access: nothing runs on claude.ai before it's allowed",
+    `adopted=${shut.adopted} theme=${shut.theme}`);
+
   await call({ cmd: "popup", tab: "popup", path: "src/popup/popup.html" });
   await wait(600);
   check(!(await notice()).shown, "access: no notice while no site wears a theme");
@@ -170,12 +179,10 @@ try {
   const allowed = await until(notice, (v) => !v.shown);
   check(!allowed.shown, "access: Allow asks again, and once allowed the notice goes");
 
-  await call({ cmd: "open", tab: "claude", url: "https://claude.ai/" });
-  const themed = await until(() => evalIn("claude", `return {
-      theme: document.documentElement.getAttribute("data-tema"),
-      party: document.querySelectorAll(".ff-party-member").length }`), (v) => v.party === 4);
-  check(themed.theme === "final-fantasy" && themed.party === 4, "access: once allowed, claude.ai wears the theme",
-    `theme=${themed.theme} party=${themed.party}`);
+  const themed = await until(claude, (v) => v.party === 4);
+  check(themed.theme === "final-fantasy" && themed.party === 4 && themed.adopted >= 1,
+    "access: once allowed, the open claude.ai tab wears the theme without a reload",
+    `theme=${themed.theme} party=${themed.party} adopted=${themed.adopted}`);
 } finally {
   await asking.close();
   await standIns.close();

@@ -47,14 +47,34 @@ replace the folder, press **↻** on Tema's card in `chrome://extensions`, then
 reload your open Claude / ChatGPT / Gemini tabs (a tab keeps the old copy until
 it reloads).
 
-Safari support is planned.
+## Install (Safari)
+
+Safari takes extensions inside a Mac app, and Tema's is built from this
+repository, so you need a Mac with Xcode and Node.js.
+
+1. Clone this repository and, in it, run `node tools/safari.mjs`. It builds
+   the app, installs it as `/Applications/Tema.app` and registers it with
+   Safari.
+2. In Safari: **Settings → Extensions**, tick **Tema**.
+3. Click Tema's button in the toolbar and tick the sites a theme should be on.
+   Safari asks once per site whether Tema may run there; allow it (or let it
+   onto all three at once under Settings → Extensions → Tema → Edit Websites).
+4. Reload any open Claude, ChatGPT or Gemini tabs.
+
+**Signing.** With an *Apple Development* certificate in your keychain (Xcode →
+Settings → Accounts → your Apple ID → Manage Certificates → +), the app is
+signed with it and Safari keeps Tema switched on. Without one it is signed
+"to run locally", which Safari only accepts while **Develop → Developer
+Settings → Allow unsigned extensions** is on, and that resets whenever Safari
+quits. **Updating:** pull, run `node tools/safari.mjs` again, reload your tabs.
+More in [docs/safari.md](docs/safari.md).
 
 ## What it can see
 
 - It runs on three sites and nowhere else: claude.ai, chatgpt.com and
   gemini.google.com.
 - Its only permission is `storage`, for your choices (synced with your browser
-  profile).
+  profile). Safari also asks you, site by site, before Tema may run there.
 - Everything it uses ships inside the extension. Nothing is downloaded at
   runtime and nothing you type or read leaves the page.
 
@@ -72,6 +92,8 @@ theme to use.
   the behaviour-script API, card art.
 - [Site notes](docs/sites.md): the hooks each site's markup offers, and the
   traps.
+- [Safari](docs/safari.md): the Mac app, what the Safari build does
+  differently, and how it is tested without Safari.
 
 ## Development
 
@@ -81,6 +103,7 @@ node tools/check.mjs          # every test suite
 node tools/package.mjs        # release/tema.zip
 node tools/mocks/screenshots.mjs        # README pictures from the mocks
 node tools/tests/extension.mjs --shots  # the popup picture
+node tools/safari.mjs                   # build + install the Safari app (stage | build | install)
 ```
 
 `check.mjs` runs: build freshness, settings unit tests, a smoke run of the
@@ -90,6 +113,9 @@ render probes for all three sites, the release zip's contents, and an
 end-to-end run of the installed extension, driven through its popup. The
 browser suites use Chrome; the end-to-end one needs Chrome for Testing or
 Chromium (branded Chrome ignores `--load-extension`) and skips without it.
+Then the Safari build end to end in WebKit's own extension runtime, and the
+smoke, glyph, wide and render suites again in WebKit (macOS 15.4 or later with
+Xcode's command line tools; they skip elsewhere).
 
 The offline mocks (`tools/mocks/*.html`) open straight from disk for visual
 work. `tools/live/` has console snippets for capturing a live page's structure.

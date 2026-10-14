@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **Safari.** Tema runs in Safari, as a Mac app built from this repository:
+  `node tools/safari.mjs` builds it, signs it (with your Apple Development
+  certificate when there is one, so Safari keeps it switched on), installs
+  `/Applications/Tema.app` and registers it with Safari. The Safari build is
+  generated from the same files as the Chrome one; its stylesheets arrive
+  with the content scripts, since Safari hasn't reliably applied a
+  manifest's CSS (docs/safari.md).
+- Safari asks, site by site, before an extension may run. Ticking a site in
+  the popup now asks for it on the spot, and a site that wears a theme but
+  isn't allowed shows a notice with an Allow button. Chrome grants its sites
+  at install, so none of this shows there.
+- Tests: the Safari build runs end to end in WebKit's own extension runtime,
+  Safari's per-site asking included, and the smoke, glyph, wide and render
+  suites run in WebKit as well as Chrome. All of them pass in both.
 - ChatGPT: the row for the page you're on (New chat, on a fresh chat) is
   the cursor row of a menu, as on Gemini: a crystal-blue wash with a thin
   white ring and a soft glow. It was a faint gold wash, which over the blue
