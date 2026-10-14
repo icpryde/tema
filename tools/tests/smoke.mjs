@@ -122,6 +122,16 @@ const PAGE = `<!doctype html>
   const choco = (variant, dur) => chrome.storage.local.set({ action: {
     theme: "final-fantasy", name: "choco", arg: dur ? { variant, dur } : variant, at: performance.now() } });
   window.__drive = async () => {
+    // Did any party member fall at any point since this was called? Watched,
+    // not sampled: in WebKit the drive runs in real time, and a single look
+    // at a fixed moment could land just before the trip or after the get-up.
+    const watchFalls = () => {
+      let fell = false;
+      const look = () => { if ([...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) fell = true; };
+      const mo = new MutationObserver(look);
+      mo.observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["data-pose"] });
+      return () => { look(); mo.disconnect(); return fell; };
+    };
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const root = document.documentElement;
     await wait(500);                                   // initial passes
@@ -174,6 +184,7 @@ const PAGE = `<!doctype html>
     // --- chocobo drive-bys, forced through the test/preview hook with short
     // durations. Variant A must knock the party over and stand them back up;
     // B/C must mount their clip wrapper inside the composer and clean up.
+    const fell = watchFalls();
     choco("a", 900);
     // The trips happen inside the crossing segment, which sits in the middle
     // of the parkour route — sample late enough to be sure it has started.
@@ -184,10 +195,11 @@ const PAGE = `<!doctype html>
     if (!document.querySelector(".ff-choco-sky")) {
       window.__errors.push("choco A: sky bird not mounted on <body> — the ground segments would be clipped away");
     }
-    if (![...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) {
+    await wait(2100);
+    // Read once the run is over: the watcher counts a fall at any point in it.
+    if (!fell()) {
       window.__errors.push("choco A: no party member fell as the bird passed");
     }
-    await wait(2100);
     if (document.querySelector(".ff-choco, .ff-choco-sky")) {
       window.__errors.push("choco A: sprite still present after the run ended");
     }
@@ -392,6 +404,16 @@ const GPT_PAGE = `<!doctype html>
   const choco = (variant, dur) => chrome.storage.local.set({ action: {
     theme: "final-fantasy", name: "choco", arg: dur ? { variant, dur } : variant, at: performance.now() } });
   window.__drive = async () => {
+    // Did any party member fall at any point since this was called? Watched,
+    // not sampled: in WebKit the drive runs in real time, and a single look
+    // at a fixed moment could land just before the trip or after the get-up.
+    const watchFalls = () => {
+      let fell = false;
+      const look = () => { if ([...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) fell = true; };
+      const mo = new MutationObserver(look);
+      mo.observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["data-pose"] });
+      return () => { look(); mo.disconnect(); return fell; };
+    };
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const root = document.documentElement;
     await wait(500);
@@ -484,6 +506,7 @@ const GPT_PAGE = `<!doctype html>
     }
 
     // Chocobo parkour: sky bird on <body>, box bird on the form, party trips.
+    const fell = watchFalls();
     choco("a", 900);
     await wait(750);
     if (!document.querySelector("form[data-type='unified-composer'] .ff-choco-a")) {
@@ -492,10 +515,11 @@ const GPT_PAGE = `<!doctype html>
     if (!document.querySelector("body > .ff-choco-sky")) {
       window.__errors.push("gpt choco A: sky bird not mounted on body");
     }
-    if (![...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) {
+    await wait(2100);
+    // Read once the run is over: the watcher counts a fall at any point in it.
+    if (!fell()) {
       window.__errors.push("gpt choco A: no party member fell");
     }
-    await wait(2100);
     if (document.querySelector(".ff-choco, .ff-choco-sky")) {
       window.__errors.push("gpt choco A: sprite left behind after the run");
     }
@@ -656,6 +680,16 @@ const GPT_SHELL_PAGE = `<!doctype html>
   const choco = (variant, dur) => chrome.storage.local.set({ action: {
     theme: "final-fantasy", name: "choco", arg: dur ? { variant, dur } : variant, at: performance.now() } });
   window.__drive = async () => {
+    // Did any party member fall at any point since this was called? Watched,
+    // not sampled: in WebKit the drive runs in real time, and a single look
+    // at a fixed moment could land just before the trip or after the get-up.
+    const watchFalls = () => {
+      let fell = false;
+      const look = () => { if ([...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) fell = true; };
+      const mo = new MutationObserver(look);
+      mo.observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["data-pose"] });
+      return () => { look(); mo.disconnect(); return fell; };
+    };
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const root = document.documentElement;
     const $ = (id) => document.getElementById(id);
@@ -770,6 +804,7 @@ const GPT_SHELL_PAGE = `<!doctype html>
     }
 
     // Chocobo parkour: sky bird on <body>, box bird on the stage, party trips.
+    const fell = watchFalls();
     choco("a", 900);
     await wait(750);
     if (!document.querySelector("#stage .ff-choco-a")) {
@@ -778,10 +813,11 @@ const GPT_SHELL_PAGE = `<!doctype html>
     if (!document.querySelector("body > .ff-choco-sky")) {
       window.__errors.push("shell choco A: sky bird not mounted on body");
     }
-    if (![...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) {
+    await wait(2100);
+    // Read once the run is over: the watcher counts a fall at any point in it.
+    if (!fell()) {
       window.__errors.push("shell choco A: no party member fell");
     }
-    await wait(2100);
     if (document.querySelector(".ff-choco, .ff-choco-sky")) {
       window.__errors.push("shell choco A: sprite left behind after the run");
     }
@@ -886,6 +922,16 @@ const GEMINI_PAGE = `<!doctype html>
   const choco = (variant, dur) => chrome.storage.local.set({ action: {
     theme: "final-fantasy", name: "choco", arg: dur ? { variant, dur } : variant, at: performance.now() } });
   window.__drive = async () => {
+    // Did any party member fall at any point since this was called? Watched,
+    // not sampled: in WebKit the drive runs in real time, and a single look
+    // at a fixed moment could land just before the trip or after the get-up.
+    const watchFalls = () => {
+      let fell = false;
+      const look = () => { if ([...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) fell = true; };
+      const mo = new MutationObserver(look);
+      mo.observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["data-pose"] });
+      return () => { look(); mo.disconnect(); return fell; };
+    };
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const root = document.documentElement;
     await wait(500);
@@ -995,6 +1041,7 @@ const GEMINI_PAGE = `<!doctype html>
     }
 
     // Chocobo parkour: sky bird on <body>, box bird on the pill, party trips.
+    const fell = watchFalls();
     choco("a", 900);
     await wait(750);
     if (!document.querySelector("fieldset.input-area-container .ff-choco-a")) {
@@ -1003,10 +1050,11 @@ const GEMINI_PAGE = `<!doctype html>
     if (!document.querySelector("body > .ff-choco-sky")) {
       window.__errors.push("gemini choco A: sky bird not mounted on body");
     }
-    if (![...document.querySelectorAll(".ff-party-member")].some((m) => m.dataset.pose === "fall")) {
+    await wait(2100);
+    // Read once the run is over: the watcher counts a fall at any point in it.
+    if (!fell()) {
       window.__errors.push("gemini choco A: no party member fell");
     }
-    await wait(2100);
     if (document.querySelector(".ff-choco, .ff-choco-sky")) {
       window.__errors.push("gemini choco A: sprite left behind after the run");
     }
@@ -1310,6 +1358,7 @@ async function drivePage(label, html, budget) {
   const file = resolve(ROOT, "tools/tests/.smoke.html");
   await writeFile(file, html, "utf8");
   // TEMA_ENGINE=webkit: the same drive in WebKit, Safari's engine, in real time.
+  const started = Date.now();
   const { stdout } = ENGINE === "webkit"
     ? { stdout: await dumpTitle(file, "SMOKE:", { timeout: budget / 1000 + 30 }).catch((e) => String(e)) }
     : await run(CHROME, [
@@ -1328,6 +1377,7 @@ async function drivePage(label, html, budget) {
     return;
   }
   const result = m[1].trim();
+  if (process.env.TEMA_SMOKE_TIMES) console.log(`  (${label}: ${((Date.now() - started) / 1000).toFixed(1)}s)`);
   if (result === "clean") {
     console.log(`${label}: clean — the content scripts ran through every state with no errors`);
     return;

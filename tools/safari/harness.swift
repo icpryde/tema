@@ -226,6 +226,11 @@ let ask = args.contains("--ask")
 
 let app = NSApplication.shared
 app.setActivationPolicy(.prohibited)
+// A windowless background process is App Nap's first candidate once someone
+// is using the Mac, and napping stalls the pages' timers mid-drive. Tests
+// are latency-critical work; say so for as long as the harness runs.
+let activity = ProcessInfo.processInfo.beginActivity(
+    options: [.userInitiated, .latencyCritical], reason: "Tema's tests drive pages in WebKit")
 Task { @MainActor in
     do {
         let harness = try await Harness(extensionURL: extensionURL, proxyPort: proxyPort, ask: ask)
