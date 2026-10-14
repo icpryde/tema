@@ -118,6 +118,9 @@ try {
   }
   check(await popup.eval(`[...document.querySelectorAll('.wear')].every((w) => w.classList.contains('on'))`),
     "popup: every site shows the theme it wears");
+  // Chrome grants a manifest's sites at install; the notice Safari needs
+  // (a worn site Tema isn't allowed into) must never show here.
+  check(await popup.eval(`document.getElementById("access").hidden`), "popup: no site-access notice in Chrome");
 
   // An option, from the card's settings.
   await click('.card[data-theme="final-fantasy"] .gear');
