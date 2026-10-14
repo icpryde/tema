@@ -605,6 +605,36 @@ html[data-tema="final-fantasy"] a[data-row-main-button]:hover {
   color: var(--ff-gold) !important;
 }
 
+/* The row for the page you're on (data-selected="focused": New, on a fresh
+   chat) and the chat that's open (data-selected="open") are the menu's
+   cursor row, as on ChatGPT and Gemini: crystal-blue wash, thin white ring,
+   and the windows' soft glow, gently pulsing. Claude paints both with
+   --df-selected, 15% white, which over the blue sidebar read as a grey bar. */
+@keyframes ff-row-glow {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(196, 220, 255, 0.85),
+      0 0 8px 1px rgba(134, 202, 255, 0.4),
+      0 1px 0 rgba(3, 6, 22, 0.5);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(226, 240, 255, 0.95),
+      0 0 14px 3px rgba(139, 234, 255, 0.6),
+      0 1px 0 rgba(3, 6, 22, 0.5);
+  }
+}
+
+html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focused"], [data-selected="open"]) {
+  background: linear-gradient(180deg, rgba(139, 234, 255, 0.3), rgba(92, 152, 255, 0.14)) !important;
+  border-radius: 5px !important;
+  animation: ff-row-glow 3.2s ease-in-out infinite;
+}
+html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focused"], [data-selected="open"]),
+html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focused"], [data-selected="open"]) :not(svg, svg *) {
+  color: #ffffff !important;
+}
+
 /* ---------------------------------------------------------- send button */
 
 /* Swap the round accent button for the select hand, mirrored to point left.
@@ -1431,6 +1461,7 @@ html[data-tema="final-fantasy"] .ff-shooting-star {
   html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"]),
   html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"])::before,
   html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-working]::after,
+  html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focused"], [data-selected="open"]),
   html[data-tema="final-fantasy"] .ff-party-member,
     html[data-tema="final-fantasy"] .ff-shooting-star,
   html[data-tema="final-fantasy"] div:has(> svg[data-cds="Spark"])::after,

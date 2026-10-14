@@ -20,6 +20,9 @@
   the cursor row of a menu, as on Gemini: a crystal-blue wash with a thin
   white ring and a soft glow. It was a faint gold wash, which over the blue
   window mixed to a muddy grey.
+- Claude: the same for its sidebar. New on a fresh chat, and the chat
+  that's open, wore Claude's own 15% white, a grey bar over the blue; both
+  are the blue cursor row now.
 
 ## 1.0.1 — 2026-10-14
 
