@@ -6,19 +6,28 @@ globalThis.TemaRegistry = Object.freeze({
       "id": "claude",
       "name": "Claude",
       "host": "claude.ai",
-      "color": "#d97757"
+      "color": "#d97757",
+      "matches": [
+        "https://claude.ai/*"
+      ]
     },
     {
       "id": "chatgpt",
       "name": "ChatGPT",
       "host": "chatgpt.com",
-      "color": "#10a37f"
+      "color": "#10a37f",
+      "matches": [
+        "https://chatgpt.com/*"
+      ]
     },
     {
       "id": "gemini",
       "name": "Gemini",
       "host": "gemini.google.com",
-      "color": "#6f8ff8"
+      "color": "#6f8ff8",
+      "matches": [
+        "https://gemini.google.com/*"
+      ]
     }
   ],
   "themes": [

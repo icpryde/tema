@@ -1,0 +1,597 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C136A134307F6E6E006DE29F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C136A133307F6E6E006DE29F /* AppDelegate.swift */; };
+		C136A138307F6E6E006DE29F /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = C136A136307F6E6E006DE29F /* Main.html */; };
+		C136A13A307F6E6E006DE29F /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = C136A139307F6E6E006DE29F /* Icon.png */; };
+		C136A13C307F6E6E006DE29F /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = C136A13B307F6E6E006DE29F /* Style.css */; };
+		C136A13E307F6E6E006DE29F /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = C136A13D307F6E6E006DE29F /* Script.js */; };
+		C136A140307F6E6E006DE29F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C136A13F307F6E6E006DE29F /* ViewController.swift */; };
+		C136A143307F6E6E006DE29F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C136A141307F6E6E006DE29F /* Main.storyboard */; };
+		C136A145307F6E6F006DE29F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C136A144307F6E6F006DE29F /* Assets.xcassets */; };
+		C136A14C307F6E70006DE29F /* Tema Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C136A14B307F6E70006DE29F /* Tema Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C136A151307F6E70006DE29F /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C136A150307F6E70006DE29F /* SafariWebExtensionHandler.swift */; };
+		C136A163307F6E70006DE29F /* CHANGELOG.md in Resources */ = {isa = PBXBuildFile; fileRef = C136A15D307F6E70006DE29F /* CHANGELOG.md */; };
+		C136A164307F6E70006DE29F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C136A15E307F6E70006DE29F /* README.md */; };
+		C136A165307F6E70006DE29F /* icons in Resources */ = {isa = PBXBuildFile; fileRef = C136A15F307F6E70006DE29F /* icons */; };
+		C136A166307F6E70006DE29F /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = C136A160307F6E70006DE29F /* manifest.json */; };
+		C136A167307F6E70006DE29F /* themes in Resources */ = {isa = PBXBuildFile; fileRef = C136A161307F6E70006DE29F /* themes */; };
+		C136A168307F6E70006DE29F /* src in Resources */ = {isa = PBXBuildFile; fileRef = C136A162307F6E70006DE29F /* src */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C136A14D307F6E70006DE29F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C136A128307F6E6E006DE29F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C136A14A307F6E70006DE29F;
+			remoteInfo = "Tema Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C136A158307F6E70006DE29F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				C136A14C307F6E70006DE29F /* Tema Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		C136A130307F6E6E006DE29F /* Tema.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tema.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C136A133307F6E6E006DE29F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		C136A137307F6E6E006DE29F /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		C136A139307F6E6E006DE29F /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		C136A13B307F6E6E006DE29F /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		C136A13D307F6E6E006DE29F /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		C136A13F307F6E6E006DE29F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		C136A142307F6E6E006DE29F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		C136A144307F6E6F006DE29F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C136A146307F6E6F006DE29F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C136A14B307F6E70006DE29F /* Tema Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Tema Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C136A150307F6E70006DE29F /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		C136A152307F6E70006DE29F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C136A15D307F6E70006DE29F /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = CHANGELOG.md; path = ../build/web/CHANGELOG.md; sourceTree = "<group>"; };
+		C136A15E307F6E70006DE29F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../build/web/README.md; sourceTree = "<group>"; };
+		C136A15F307F6E70006DE29F /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../build/web/icons; sourceTree = "<group>"; };
+		C136A160307F6E70006DE29F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../build/web/manifest.json; sourceTree = "<group>"; };
+		C136A161307F6E70006DE29F /* themes */ = {isa = PBXFileReference; lastKnownFileType = folder; name = themes; path = ../build/web/themes; sourceTree = "<group>"; };
+		C136A162307F6E70006DE29F /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; name = src; path = ../build/web/src; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C136A12D307F6E6E006DE29F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		C136A148307F6E70006DE29F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C136A127307F6E6E006DE29F = {
+			isa = PBXGroup;
+			children = (
+				C136A132307F6E6E006DE29F /* Tema */,
+				C136A14F307F6E70006DE29F /* Tema Extension */,
+				C136A131307F6E6E006DE29F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C136A131307F6E6E006DE29F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C136A130307F6E6E006DE29F /* Tema.app */,
+				C136A14B307F6E70006DE29F /* Tema Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C136A132307F6E6E006DE29F /* Tema */ = {
+			isa = PBXGroup;
+			children = (
+				C136A133307F6E6E006DE29F /* AppDelegate.swift */,
+				C136A13F307F6E6E006DE29F /* ViewController.swift */,
+				C136A141307F6E6E006DE29F /* Main.storyboard */,
+				C136A144307F6E6F006DE29F /* Assets.xcassets */,
+				C136A146307F6E6F006DE29F /* Info.plist */,
+				C136A135307F6E6E006DE29F /* Resources */,
+			);
+			path = Tema;
+			sourceTree = "<group>";
+		};
+		C136A135307F6E6E006DE29F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				C136A136307F6E6E006DE29F /* Main.html */,
+				C136A139307F6E6E006DE29F /* Icon.png */,
+				C136A13B307F6E6E006DE29F /* Style.css */,
+				C136A13D307F6E6E006DE29F /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		C136A14F307F6E70006DE29F /* Tema Extension */ = {
+			isa = PBXGroup;
+			children = (
+				C136A15C307F6E70006DE29F /* Resources */,
+				C136A150307F6E70006DE29F /* SafariWebExtensionHandler.swift */,
+				C136A152307F6E70006DE29F /* Info.plist */,
+			);
+			path = "Tema Extension";
+			sourceTree = "<group>";
+		};
+		C136A15C307F6E70006DE29F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				C136A15D307F6E70006DE29F /* CHANGELOG.md */,
+				C136A15E307F6E70006DE29F /* README.md */,
+				C136A15F307F6E70006DE29F /* icons */,
+				C136A160307F6E70006DE29F /* manifest.json */,
+				C136A161307F6E70006DE29F /* themes */,
+				C136A162307F6E70006DE29F /* src */,
+			);
+			name = Resources;
+			path = "Tema Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C136A12F307F6E6E006DE29F /* Tema */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C136A159307F6E70006DE29F /* Build configuration list for PBXNativeTarget "Tema" */;
+			buildPhases = (
+				C136A12C307F6E6E006DE29F /* Sources */,
+				C136A12D307F6E6E006DE29F /* Frameworks */,
+				C136A12E307F6E6E006DE29F /* Resources */,
+				C136A158307F6E70006DE29F /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C136A14E307F6E70006DE29F /* PBXTargetDependency */,
+			);
+			name = Tema;
+			productName = Tema;
+			productReference = C136A130307F6E6E006DE29F /* Tema.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C136A14A307F6E70006DE29F /* Tema Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C136A155307F6E70006DE29F /* Build configuration list for PBXNativeTarget "Tema Extension" */;
+			buildPhases = (
+				C136A147307F6E70006DE29F /* Sources */,
+				C136A148307F6E70006DE29F /* Frameworks */,
+				C136A149307F6E70006DE29F /* Resources */,
+			);
+			buildRules = (
+			);
+			name = "Tema Extension";
+			productName = "Tema Extension";
+			productReference = C136A14B307F6E70006DE29F /* Tema Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C136A128307F6E6E006DE29F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					C136A12F307F6E6E006DE29F = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					C136A14A307F6E70006DE29F = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = C136A12B307F6E6E006DE29F /* Build configuration list for PBXProject "Tema" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C136A127307F6E6E006DE29F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C136A131307F6E6E006DE29F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C136A12F307F6E6E006DE29F /* Tema */,
+				C136A14A307F6E70006DE29F /* Tema Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C136A12E307F6E6E006DE29F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				C136A13A307F6E6E006DE29F /* Icon.png in Resources */,
+				C136A143307F6E6E006DE29F /* Main.storyboard in Resources */,
+				C136A13E307F6E6E006DE29F /* Script.js in Resources */,
+				C136A138307F6E6E006DE29F /* Main.html in Resources */,
+				C136A145307F6E6F006DE29F /* Assets.xcassets in Resources */,
+				C136A13C307F6E6E006DE29F /* Style.css in Resources */,
+			);
+		};
+		C136A149307F6E70006DE29F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				C136A167307F6E70006DE29F /* themes in Resources */,
+				C136A166307F6E70006DE29F /* manifest.json in Resources */,
+				C136A165307F6E70006DE29F /* icons in Resources */,
+				C136A168307F6E70006DE29F /* src in Resources */,
+				C136A164307F6E70006DE29F /* README.md in Resources */,
+				C136A163307F6E70006DE29F /* CHANGELOG.md in Resources */,
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C136A12C307F6E6E006DE29F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				C136A140307F6E6E006DE29F /* ViewController.swift in Sources */,
+				C136A134307F6E6E006DE29F /* AppDelegate.swift in Sources */,
+			);
+		};
+		C136A147307F6E70006DE29F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				C136A151307F6E70006DE29F /* SafariWebExtensionHandler.swift in Sources */,
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C136A14E307F6E70006DE29F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C136A14A307F6E70006DE29F /* Tema Extension */;
+			targetProxy = C136A14D307F6E70006DE29F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		C136A136307F6E6E006DE29F /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C136A137307F6E6E006DE29F /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		C136A141307F6E6E006DE29F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C136A142307F6E6E006DE29F /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C136A153307F6E70006DE29F /* Debug configuration for PBXProject "Tema" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C136A154307F6E70006DE29F /* Release configuration for PBXProject "Tema" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		C136A156307F6E70006DE29F /* Debug configuration for PBXNativeTarget "Tema Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tema Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Tema Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kurisu.Tema.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C136A157307F6E70006DE29F /* Release configuration for PBXNativeTarget "Tema Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tema Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Tema Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kurisu.Tema.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C136A15A307F6E70006DE29F /* Debug configuration for PBXNativeTarget "Tema" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tema/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Tema;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kurisu.Tema;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C136A15B307F6E70006DE29F /* Release configuration for PBXNativeTarget "Tema" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tema/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Tema;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kurisu.Tema;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C136A12B307F6E6E006DE29F /* Build configuration list for PBXProject "Tema" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C136A153307F6E70006DE29F /* Debug configuration for PBXProject "Tema" */,
+				C136A154307F6E70006DE29F /* Release configuration for PBXProject "Tema" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		C136A155307F6E70006DE29F /* Build configuration list for PBXNativeTarget "Tema Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C136A156307F6E70006DE29F /* Debug configuration for PBXNativeTarget "Tema Extension" */,
+				C136A157307F6E70006DE29F /* Release configuration for PBXNativeTarget "Tema Extension" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		C136A159307F6E70006DE29F /* Build configuration list for PBXNativeTarget "Tema" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C136A15A307F6E70006DE29F /* Debug configuration for PBXNativeTarget "Tema" */,
+				C136A15B307F6E70006DE29F /* Release configuration for PBXNativeTarget "Tema" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C136A128307F6E6E006DE29F /* Project object */;
+	validationLevel = 1;
+}

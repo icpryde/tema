@@ -72,10 +72,44 @@
     return t ? t.name : id;
   };
 
+  /* --------------------------------------------------------- site access */
+
+  // Chrome lets an extension into its sites when it is installed. Safari
+  // asks per site and runs nothing on a site until you allow it, so a
+  // ticked site could stay unthemed for no visible reason. Ticking a site
+  // asks for it (Safari only prompts during the click itself), and a site
+  // that wears a theme without being allowed gets a notice with an Allow
+  // button. Where every site is allowed, as in Chrome, none of it shows.
+  const perms = api.permissions || null;
+  const access = {};                // site id -> false once known to be refused
+
+  const contains = (origins) => promised
+    ? perms.contains({ origins })
+    : new Promise((resolve) => perms.contains({ origins }, resolve));
+  const request = (origins) => promised
+    ? perms.request({ origins })
+    : new Promise((resolve) => perms.request({ origins }, resolve));
+
+  async function checkAccess() {
+    if (!perms) return;
+    await Promise.all(SITES.map(async (s) => {
+      try { access[s.id] = await contains(s.matches); } catch { access[s.id] = true; }
+    }));
+    update();
+  }
+
+  // Must be called straight from a click: the request has to start before
+  // the handler awaits anything, or Safari won't show its prompt.
+  function askAccess(siteIds) {
+    if (!perms) return;
+    request(siteIds.flatMap((id) => siteById[id].matches)).then(checkAccess, checkAccess);
+  }
+
   /* ------------------------------------------------------------- actions */
 
   async function toggleSite(theme, siteId) {
     const wearing = settings.sites[siteId] === theme.id;
+    if (!wearing && access[siteId] === false) askAccess([siteId]);
     const { sites, previous } = S.withSite(settings, siteId, wearing ? null : theme.id);
     raw = { ...raw, sites };
     settings = S.read(raw, REG);
@@ -122,6 +156,20 @@
         h("span", { class: "wear-site", text: s.name }),
         h("span", { class: "wear-theme", text: t ? `${t.emoji} ${t.name}` : "Own look" }));
     }));
+  }
+
+  /** Sites wearing a theme that the browser hasn't let Tema into yet. */
+  function renderAccess() {
+    const el = document.getElementById("access");
+    const blocked = SITES.filter((s) => access[s.id] === false && S.activeTheme(settings, s.id, REG));
+    el.hidden = !blocked.length;
+    if (!blocked.length) return el.replaceChildren();
+    const names = blocked.map((s) => s.name);
+    const list = names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names[0];
+    el.replaceChildren(
+      h("span", { class: "access-text", text: `Tema needs your OK to theme ${list}.` }),
+      h("button", { type: "button", class: "access-btn", text: "Allow",
+        onclick: () => askAccess(blocked.map((s) => s.id)) }));
   }
 
   /** The art strip at the top of a card: the theme's own, or its colours. */
@@ -223,6 +271,7 @@
   /** Reflect the current settings without rebuilding (keeps focus and art). */
   function update() {
     renderWearing();
+    renderAccess();
     for (const theme of REG.themes) {
       const el = cards.get(theme.id);
       if (!el) continue;
@@ -267,6 +316,9 @@
     const remembered = local.popup && local.popup.open;
     if (remembered && S.themeById(REG, remembered)) openSettings = remembered;
     render();
+    checkAccess();
+    if (perms && perms.onAdded) perms.onAdded.addListener(checkAccess);
+    if (perms && perms.onRemoved) perms.onRemoved.addListener(checkAccess);
 
     // Another popup, or a second browser window, can change things too.
     api.storage.onChanged.addListener((changes, area) => {

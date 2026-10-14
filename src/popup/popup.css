@@ -112,6 +112,33 @@ h1 {
 }
 .wear.on .wear-theme { color: var(--muted); }
 
+/* A site wearing a theme that the browser hasn't let Tema into yet. */
+.access {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 8px 8px 11px;
+  border-radius: 10px;
+  background: color-mix(in srgb, #ffd75e 9%, var(--panel));
+  border: 1px solid color-mix(in srgb, #ffd75e 35%, var(--line));
+}
+.access[hidden] { display: none; }
+
+.access-text { flex: 1; font-size: 12px; color: var(--text); }
+
+.access-btn {
+  flex: none;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 0;
+  background: #ffd75e;
+  color: #1c1606;
+  font-weight: 650;
+  cursor: pointer;
+}
+.access-btn:hover { background: #ffe28a; }
+
 /* --------------------------------------------------------------- themes */
 
 /* No scroller of its own: past Chrome's 600px popup limit the whole popup

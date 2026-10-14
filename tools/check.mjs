@@ -17,6 +17,9 @@
 //   package    the release zip holds exactly what the extension needs
 //   extension  the installed extension end to end, driven through its popup
 //              (needs Chrome for Testing or Chromium; skips without one)
+//   safari     the Safari build end to end in WebKit's extension runtime,
+//              Safari's per-site access included (macOS 15.4+ with the
+//              Xcode command line tools; skips without them)
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -35,6 +38,7 @@ const SUITES = [
   ["render", ["tools/tests/render.mjs"]],
   ["package", ["tools/tests/package.mjs"]],
   ["extension", ["tools/tests/extension.mjs"]],
+  ["safari", ["tools/tests/safari.mjs"]],
 ];
 
 let failed = 0;

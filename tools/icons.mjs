@@ -5,7 +5,10 @@
 // The mark is テ, the first kana of テーマ (tēma, "theme"), drawn on a 16x16
 // pixel grid below. Pixel art scales cleanly only by whole numbers, so every
 // size is the same grid at an integer factor: 16 (x1), 32 (x2), 48 (x3) and
-// 128 (x8). Writes icons/icon{16,32,48,128}.png and src/popup/logo.svg.
+// 128 (x8). Writes icons/icon{16,32,48,128}.png and src/popup/logo.svg, and
+// the Safari app's icons (safari/Tema/Assets.xcassets/AppIcon.appiconset and
+// the app window's Resources/Icon.png): the same grid inset in each square
+// about as far as macOS insets its own icons, at whole-number scales.
 // No dependencies: the PNGs are encoded here with node:zlib.
 
 import { writeFile, mkdir } from "node:fs/promises";
@@ -82,14 +85,17 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc]);
 }
 
-function png(scale) {
-  const size = N * scale;
+// `margin` transparent pixels around the scaled grid.
+function png(scale, margin = 0) {
+  const size = N * scale + 2 * margin;
   const raw = Buffer.alloc(size * (size * 4 + 1));
   for (let y = 0; y < size; y++) {
     const row = y * (size * 4 + 1);
     raw[row] = 0;   // filter: none
     for (let x = 0; x < size; x++) {
-      raw.set(pixel(Math.floor(x / scale), Math.floor(y / scale)), row + 1 + x * 4);
+      const gx = Math.floor((x - margin) / scale), gy = Math.floor((y - margin) / scale);
+      const inside = x >= margin && y >= margin && gx < N && gy < N;
+      raw.set(inside ? pixel(gx, gy) : [0, 0, 0, 0], row + 1 + x * 4);
     }
   }
   const ihdr = Buffer.alloc(13);
@@ -126,4 +132,19 @@ for (const [size, scale] of [[16, 1], [32, 2], [48, 3], [128, 8]]) {
   await writeFile(resolve(ROOT, `icons/icon${size}.png`), png(scale));
 }
 await writeFile(resolve(ROOT, "src/popup/logo.svg"), svg(), "utf8");
-console.log("wrote icons/icon{16,32,48,128}.png and src/popup/logo.svg");
+
+// The Mac app: macOS draws its icons on about 13/16 of the square, so the
+// tile takes the whole-number scale nearest that, centred. The tiny sizes
+// round up to the full square, which reads better than a 12px tile.
+const appIcon = (size) => {
+  const scale = Math.max(1, Math.round((size * 13) / 16 / N));
+  return png(scale, (size - N * scale) / 2);
+};
+const ICONSET = resolve(ROOT, "safari/Tema/Assets.xcassets/AppIcon.appiconset");
+for (const size of [16, 32, 128, 256, 512]) {
+  await writeFile(`${ICONSET}/mac-icon-${size}@1x.png`, appIcon(size));
+  await writeFile(`${ICONSET}/mac-icon-${size}@2x.png`, appIcon(size * 2));
+}
+// The app window shows it at 128pt: 256px, the grid at x16.
+await writeFile(resolve(ROOT, "safari/Tema/Resources/Icon.png"), png(16));
+console.log("wrote icons/icon{16,32,48,128}.png, src/popup/logo.svg and the Safari app's icons");

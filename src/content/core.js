@@ -43,6 +43,36 @@
   // or the page keeps half a theme until it is reloaded.
   const alive = () => { try { return !!(api.runtime && api.runtime.id); } catch { return false; } };
 
+  /* -------------------------------------------------------------- Safari */
+
+  // Safari runs content scripts but hasn't reliably applied a manifest's CSS
+  // to freshly loaded pages (found porting Apollo, 2026-10). So the Safari
+  // build (tools/safari.mjs) lists no CSS and ships this site's stylesheets
+  // as text in src/safari/<site>.js, which loads first, and they are adopted
+  // here as one constructed stylesheet: no page policy blocks those, and
+  // they cascade after the page's own sheets at the same (author) level as
+  // Chrome's injected CSS. A page that replaces document.adoptedStyleSheets
+  // would drop it, so every pass puts it back.
+  let adopted = null;
+
+  function adoptStyles() {
+    const css = globalThis.TemaSafariCss;
+    if (typeof css !== "string" || typeof CSSStyleSheet !== "function" || !("adoptedStyleSheets" in document)) return;
+    if (!adopted) {
+      adopted = new CSSStyleSheet();
+      adopted.replaceSync(css);
+    }
+    if (!document.adoptedStyleSheets.includes(adopted)) {
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, adopted];
+    }
+  }
+
+  function dropStyles() {
+    if (adopted) document.adoptedStyleSheets = document.adoptedStyleSheets.filter((s) => s !== adopted);
+  }
+
+  adoptStyles();
+
   function storageGet(area, keys) {
     try {
       if (promised) return api.storage[area].get(keys).then((v) => v || {}, () => ({}));
@@ -169,6 +199,7 @@
       current = null;
     }
     unloadFonts();
+    dropStyles();
     observe(false);
     guard.disconnect();
     ROOT.removeAttribute(THEME_ATTR);
@@ -198,6 +229,7 @@
     passTimer = null;
     if (!alive()) { shutdown(); return; }
     if (!current) return;
+    adoptStyles();
     for (const p of current.parts) call(p, "pass");
   }
 

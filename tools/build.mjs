@@ -125,7 +125,9 @@ export async function loadThemes() {
 
 function registryJs({ sites, themes }) {
   const data = {
-    sites: sites.map(({ id, name, host, color }) => ({ id, name, host, color })),
+    // matches: the popup asks for access to them where a browser makes you
+    // allow each site (Safari).
+    sites: sites.map(({ id, name, host, color, matches }) => ({ id, name, host, color, matches })),
     themes: themes.map((t) => ({
       id: t.id,
       name: t.name,

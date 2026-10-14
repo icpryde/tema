@@ -15,16 +15,11 @@
 // Skips (exit 0, with a note) when no Chrome for Testing / Chromium is
 // installed: branded Chrome ignores --load-extension.
 
-import { createServer } from "node:https";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findTestBrowser, launch, extensionId } from "../lib/browser.mjs";
-
-const run = promisify(execFile);
+import { PAGES, startStandIns } from "../lib/stand-ins.mjs";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SHOTS = process.argv.includes("--shots");
 
@@ -37,66 +32,9 @@ if (!binary) {
 
 /* ------------------------------------------------------- the stand-ins */
 
-// Just enough of each site for the engine and the theme to find their
-// footing: a composer, a settled reply, a sidebar row.
-const PAGES = {
-  "claude.ai": `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>claude stand-in</title>
-<style>body{margin:0;background:#262624;color:#eee;font:14px system-ui}main{padding:40px 80px}
-.cursor-text{position:relative;margin-top:120px;min-height:70px;border:1px solid #444;border-radius:16px}</style></head>
-<body class="font-ui"><aside class="dframe-sidebar"><div class="dframe-sidebar-body">
-<a data-row-main-button href="#"><span class="df-leading-slot"></span><span>A chat</span></a></div></aside>
-<main class="dframe-content"><div role="article"><div data-is-streaming="false" id="reply" class="group relative">
-<div class="font-claude-response"><p>A settled reply.</p></div></div></div>
-<div class="sticky bottom-0"><fieldset><div class="cursor-text" id="composer">
-<div data-testid="chat-input" role="textbox" contenteditable="true"></div></div></fieldset></div></main></body></html>`,
-
-  "chatgpt.com": `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>chatgpt stand-in</title>
-<style>body{margin:0;background:#212121;color:#eee;font:14px system-ui}main{padding:40px 80px}
-[data-composer-surface-variant]{min-height:60px;border-radius:28px;background:#303030;margin-top:120px}</style></head>
-<body><main><div data-turn-key="t1">
-<div data-chatgpt-search-unit-key="t1:user"><div data-user-message-bubble>hello</div></div>
-<div data-chatgpt-search-unit-key="t1:assistant" id="reply"><div data-markdown-text-style="assistant-message"><p>A settled reply.</p></div>
-<div class="turn-action-controls"><button aria-label="Copy">c</button></div></div></div>
-<form data-chatgpt-composer data-composer-placement="home"><div id="stage"><div data-composer-surface-variant id="composer">
-<div class="ProseMirror" data-composer-markdown contenteditable="true"></div></div></div></form></main></body></html>`,
-
-  "gemini.google.com": `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>gemini stand-in</title>
-<style>body{margin:0;background:#131314;color:#eee;font:14px system-ui}main{padding:40px 80px}
-.input-area-container{display:flex;flex-direction:column;margin-top:120px;border-radius:28px}
-input-area-v2{display:block;min-height:56px;background:#1e1f20;border-radius:28px}</style></head>
-<body class="dark-theme"><main><div class="conversation-container">
-<user-query><span class="user-query-bubble-with-background">hello</span></user-query>
-<model-response id="reply"><div class="response-container"><div class="response-container-content">
-<message-content><div class="markdown"><p>A settled reply.</p></div></message-content></div></div>
-<message-actions><button aria-label="Copy">c</button></message-actions></model-response></div>
-<input-container><div class="input-area-container" id="composer"><input-area-v2><div class="input-area">
-<rich-textarea><div class="ql-editor" contenteditable="true"></div></rich-textarea></div></input-area-v2></div></input-container>
-</main></body></html>`,
-};
-
-/* --------------------------------------------------------- the server */
-
-const certDir = await mkdtemp(join(tmpdir(), "tema-cert-"));
-await run("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
-  "-subj", "/CN=tema-test", "-keyout", join(certDir, "key.pem"), "-out", join(certDir, "cert.pem")]);
-const server = createServer({
-  key: await readFile(join(certDir, "key.pem")),
-  cert: await readFile(join(certDir, "cert.pem")),
-}, (req, res) => {
-  const host = (req.headers.host || "").split(":")[0];
-  if (req.url === "/" && PAGES[host]) {
-    // claude.ai's real policy refuses data: fonts (2026-10), which silently
-    // dropped the theme's embedded pixel fonts there. Serve the same rule.
-    const csp = host === "claude.ai" ? { "content-security-policy": "font-src 'self'" } : {};
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8", ...csp });
-    res.end(PAGES[host]);
-  } else {
-    res.writeHead(404);
-    res.end();
-  }
-});
-await new Promise((r) => server.listen(0, "127.0.0.1", r));
-const port = server.address().port;
+// At the real hostnames: --host-rules below maps them to the local server.
+const standIns = await startStandIns();
+const port = standIns.port;
 
 /* ----------------------------------------------------------- the run */
 
@@ -210,8 +148,7 @@ try {
   }
 } finally {
   await browser.close();
-  server.close();
-  await rm(certDir, { recursive: true, force: true });
+  await standIns.close();
 }
 
 console.log(failed ? `\n${failed} check(s) failed` : "\nthe installed extension works end to end on all three sites");
