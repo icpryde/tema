@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Claude: the blue cursor row on New and on the open chat was the
+  see-through wash alone, which over the dark sidebar came out a greyer,
+  tealer blue than the menu window beside it. Out there it now carries the
+  window's own royal blue under the wash; inside the nav window it's
+  unchanged.
+
 ## 1.1.0 — 2026-10-14
 
 - **Safari.** Tema runs in Safari, as a Mac app. Build it from this

@@ -86,6 +86,8 @@ const BODY = `
   <div class="df-recents-anchor"><div class="group/section">
     <div data-row-key="chat:0"><div><div data-row><a data-row-main-button href="#"><span class="df-leading-slot"></span><span class="flex-1 min-w-0">A recent chat</span></a></div></div></div>
     <div data-row-key="chat:1"><div><div data-row><a data-row-main-button href="#"><span class="df-leading-slot"></span><span class="flex-1 min-w-0">Another chat</span></a></div></div></div>
+    <!-- A selected row inside the nav window, for comparison. -->
+    <div data-testid="nav-pin-rows"><a data-row-main-button data-selected="focused" data-nav-item="projects" href="#" id="navselected"><span class="df-leading-slot"></span><span>Projects</span></a></div>
     <!-- The open chat: Claude marks it data-selected="open". -->
     <div data-row-key="chat:2"><div><div data-row><a data-row-main-button data-selected="open" href="#" id="openchat" style="background-color: rgba(255,255,255,.15)"><span class="df-leading-slot"></span><span class="flex-1 min-w-0">The open chat</span></a></div></div></div>
   </div></div>
@@ -251,6 +253,7 @@ const PROBES = JSON.stringify([
   ["recents icon 0", '[data-row-key="chat:0"] .df-leading-slot',        "::after", ["backgroundImage", "width", "height"]],
   ["recents icon 1", '[data-row-key="chat:1"] .df-leading-slot',        "::after", ["backgroundImage"]],
   ["open chat row",  "#openchat",                                       null,      ["backgroundImage", "animationName"]],
+  ["nav selected",   "#navselected",                                    null,      ["backgroundImage", "animationName"]],
   ["sidebar frame",  ".dframe-sidebar-body",                            null,      ["borderTopWidth", "borderTopColor", "backgroundColor"]],
   ["scenery",        "main.dframe-content",                             "::before", ["content", "backgroundImage"]],
   ["starfield",      "main.dframe-content",                             "::after",  ["content", "backgroundImage", "animationName"]],
@@ -424,9 +427,10 @@ const MUST_BE_STYLED = {
   // compounding. Any other value here means the unit or the number drifted.
   "reply deep":    ["fontSize", /^12px$/],
   "reply crystal": ["width", /^16px$/],
-  // The open chat is the cursor row, blue as on the other sites; Claude's
-  // own --df-selected (15% white, set inline here) read as a grey bar.
-  "open chat row": ["backgroundImage", /linear-gradient\(rgba\(139, 234, 255/],
+  // A selected row is the cursor row, blue as on the other sites; Claude's
+  // own --df-selected (15% white, set inline on the open chat here) read
+  // as a grey bar. Inside the nav window it's the see-through wash alone.
+  "nav selected": ["backgroundImage", /^linear-gradient\(rgba\(139, 234, 255, 0\.3\), rgba\(92, 152, 255, 0\.14\)\)$/],
   "horizon":       ["backgroundSize", /1878px 409px/],
   "cowork tray":   ["backgroundImage", /linear-gradient/],
   "tray font":     ["fontFamily", /Silkscreen/],
@@ -526,6 +530,21 @@ const MUST_BE_STYLED = {
   cds("cds bubble", /linear-gradient/.test(bubble.backgroundImage) && bubble.borderTopWidth === "2px" &&
     /Press Start/.test(utext.fontFamily) && uacts.borderTopWidth === "0px",
     `your bubble is a menu window in Press Start, its action row bare (${bubble.borderTopWidth}, ${uacts.borderTopWidth})`);
+}
+
+// Out on the dark sidebar a selected row carries the window's own blue
+// under the wash (a longer, layered value, hashed by the reporter), so it
+// isn't a different shade from the nav window beside it.
+{
+  const row = (l) => { const r = a.find(([x]) => x === l); return r && typeof r[1] === "object" ? r[1] : {}; };
+  const open = row("open chat row"), inNav = row("nav selected");
+  checks++;
+  if (/^img#/.test(open.backgroundImage) && open.backgroundImage !== inNav.backgroundImage && open.animationName === "ff-row-glow") {
+    console.log(`ok   ${"open chat row".padEnd(16)} outside the nav window the cursor row brings the window's blue under its wash`);
+  } else {
+    bad++;
+    console.log(`FAIL ${"open chat row".padEnd(16)} background ${open.backgroundImage} (in the nav window: ${inNav.backgroundImage}), ${open.animationName}`);
+  }
 }
 
 // Voice mode's microphone menu sits beside the voice chip, not over it.

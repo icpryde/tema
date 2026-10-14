@@ -630,6 +630,15 @@ html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focuse
   border-radius: 5px !important;
   animation: ff-row-glow 3.2s ease-in-out infinite;
 }
+
+/* That wash is see-through: inside a menu window (the nav rows) it lifts
+   the window's royal blue, as on ChatGPT and Gemini, but New and the chats
+   stand straight on the dark sidebar, where the same wash came out a
+   greyer, tealer blue than the window beside it. Out there the row brings
+   the window's own blue with it, under the wash. */
+html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focused"], [data-selected="open"]):not([data-testid="nav-pin-rows"] *) {
+  background: linear-gradient(180deg, rgba(139, 234, 255, 0.3), rgba(92, 152, 255, 0.14)), var(--ff-window) !important;
+}
 html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focused"], [data-selected="open"]),
 html[data-tema="final-fantasy"] [data-row-main-button]:is([data-selected="focused"], [data-selected="open"]) :not(svg, svg *) {
   color: #ffffff !important;
