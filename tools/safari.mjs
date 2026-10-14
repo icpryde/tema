@@ -153,7 +153,8 @@ export async function install() {
   await rm(dirname(staged), { recursive: true, force: true });
   await mkdir(dirname(staged), { recursive: true });
   await run("ditto", [built, staged]);
-  await run("osascript", ["-e", `tell application id "${BUNDLE_ID}" to quit`]).catch(() => {});
+  // "tell … to quit" alone would launch the app to quit it.
+  await run("osascript", ["-e", `if application id "${BUNDLE_ID}" is running then tell application id "${BUNDLE_ID}" to quit`]).catch(() => {});
   await rm(dest, { recursive: true, force: true });
   await run("mv", [staged, dest]);
 
