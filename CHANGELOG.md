@@ -1,17 +1,7 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 — 2026-10-14
 
-- Gemini: the New chat box sits flush with the boxes below it again (Gemini 4
-  wraps it in a container with an 8px margin of its own) and no longer shows
-  a double border: New chat is alone in that box now, so the active row's
-  ring ran just inside the box's frame. The active row keeps its wash.
-- Claude: the account row's right-hand button (now "Get apps and
-  extensions", "Send feedback" before it) wears the menu crystal again.
-  The crystal follows the slot, not the label.
-- Claude: voice mode and its microphone menu (the ⌄) are one split control,
-  and now look like one: a single chip with two halves. Chipped separately,
-  the ⌄ (tucked 6px under by Claude) drew over the voice button.
 - Claude rebuilt its chat page (2026-10), and replies had lost the theme:
   no window, no crystal, no pixel type, no Mog. Replies are menu windows
   again, with the action row (Copy, the thumbs, Retry) outside the window
@@ -20,19 +10,29 @@
   moment you send until Claude's last word, in place of Claude's own clay
   working mark. The colourful-text option and the wide-table windows
   follow the new page too.
+- Claude: the account row's right-hand button (now "Get apps and
+  extensions", "Send feedback" before it) wears the menu crystal again.
+  The crystal follows the slot, not the label.
+- Claude: voice mode and its microphone menu (the ⌄) are one split control,
+  and now look like one: a single chip with two halves. Chipped separately,
+  the ⌄ (tucked 6px under by Claude) drew over the voice button.
+- No more errors on Tema's Errors page from claude.ai: the theme's fonts
+  were also embedded in a stylesheet, which claude.ai refuses (logging an
+  error each time). claude.ai gets them only the way it already used them,
+  loaded by the extension itself.
 - Gemini: Mog stands under the reply again. Gemini 4's wide layout centres
   each reply in a reading column while the box around it spans the screen,
   and Mog had stayed at that box's far left edge. And for the couple of
   seconds before Gemini starts a reply, he now waits under your new message
   instead of hopping under the previous reply above it (and no longer
   flashes back there for a moment when the reply appears).
+- Gemini: the New chat box sits flush with the boxes below it again (Gemini 4
+  wraps it in a container with an 8px margin of its own) and no longer shows
+  a double border: New chat is alone in that box now, so the active row's
+  ring ran just inside the box's frame. The active row keeps its wash.
 - The crystal in a one-line reply sat low, running onto the window's
   bottom border; in a window that short it now centres on the line. Longer
   replies are unchanged.
-- No more errors on Tema's Errors page from claude.ai: the theme's fonts
-  were also embedded in a stylesheet, which claude.ai refuses (logging an
-  error each time). claude.ai gets them only the way it already used them,
-  loaded by the extension itself.
 
 ## 1.0.0 — 2026-10-13
 
