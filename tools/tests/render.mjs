@@ -100,6 +100,25 @@ const BODY = `
       </div>
     </div>
   </div></div>
+  <!-- The 2026-10 transcript (live markup, 2026-10-14): a UserMessage whose
+       bubble sits beside its action row, and an AssistantMessage holding the
+       status row and body in a content column, with its action row inside. -->
+  <div data-cds="UserMessage" data-turn-key id="cdsuser">
+    <div class="relative flex min-w-0 flex-col" id="cdsbubble"><div><div class="cds-user-message-body">
+      <div data-testid="user-message"><div class="contents"><p id="cdsusertext">whats pikas full name</p></div></div>
+    </div></div></div>
+    <div data-cds="MessageActions" role="toolbar" id="cdsuseracts"><button data-cds="Button" aria-label="Edit"></button></div>
+  </div>
+  <div data-cds="AssistantMessage" data-testid="assistant-message" data-turn-key data-is-streaming="false" data-tema-reply="1" data-tema-latest id="cdsreply">
+    <h2 class="sr-only" data-find-omitted>Claude said:</h2>
+    <div class="flex min-w-0 flex-col" id="cdscol">
+      <div data-cds="TurnStatus" data-find-omitted data-state="done"><span>Figuring out what Pika means.</span></div>
+      <div class="min-w-0"><div class="grid"><div data-transcript-engine-root class="contents">
+        <div class="prose"><div class="standard-markdown"><p id="cdstext">If you mean <strong id="cdsbold">Pikachu</strong>, that is the full name.</p></div></div>
+      </div></div></div>
+    </div>
+    <div class="print:mt-xs" id="cdsactsrow"><div data-cds="MessageActions" role="toolbar"><button data-cds="Button" aria-label="Copy"></button></div></div>
+  </div>
   <div class="cowork-tray rounded-b-[20px] bg-surface-1 flex h-[60px] items-center px-3.5 text-footnote">
     <div><span>Project</span></div><div><span>Manual</span></div>
   </div>
@@ -296,6 +315,18 @@ const PROBES = JSON.stringify([
   ["chocobo stage",  ".ff-choco-a",                                    null,      ["width", "height", "zIndex", "pointerEvents"]],
   ["chocobo sky",    ".ff-choco-sky",                                  null,      ["position", "zIndex", "pointerEvents"]],
   ["chocobo sky spr", ".ff-choco-sky .ff-choco",                     null,      ["animationName"]],
+  // The 2026-10 transcript: the window on the content column, never on the
+  // reply wrapper or its action row; Mog standing under the reply.
+  ["cds window",     "#cdscol",                                        null,      ["borderTopWidth", "backgroundImage", "animationName"]],
+  ["cds crystal",    "#cdscol",                                        "::before", ["backgroundImage", "width"]],
+  ["cds wrapper",    "#cdsreply",                                      null,      ["borderTopWidth", "backgroundImage", "paddingLeft"]],
+  ["cds actions",    "#cdsactsrow",                                    null,      ["borderTopWidth", "backgroundImage"]],
+  ["cds mog",        "#cdsreply",                                      "::after", ["content", "backgroundImage", "animationName"]],
+  ["cds text",       "#cdstext",                                       null,      ["fontFamily", "fontSize", "color"]],
+  ["cds bold",       "#cdsbold",                                       null,      ["color"]],
+  ["cds bubble",     "#cdsbubble",                                     null,      ["backgroundImage", "borderTopWidth"]],
+  ["cds user text",  "#cdsusertext",                                   null,      ["fontFamily"]],
+  ["cds user acts",  "#cdsuseracts",                                   null,      ["borderTopWidth", "backgroundImage"]],
 ]);
 
 const REPORT = `
@@ -450,6 +481,36 @@ const MUST_BE_STYLED = {
     bad++;
     console.log(`FAIL ${"code nav remap".padEnd(16)} code More icon is ${cm === "none" ? "missing" : "a Home icon"} — the positional mapping is leaking again`);
   }
+}
+
+// The 2026-10 transcript: one window per reply, on the content column; the
+// wrapper and both action rows bare; Mog parked (no hop) under the reply;
+// both message bodies in the face with lowercase.
+{
+  const row = (l) => { const r = a.find(([x]) => x === l); return r && typeof r[1] === "object" ? r[1] : {}; };
+  const win = row("cds window"), wrap = row("cds wrapper"), acts = row("cds actions"), mog = row("cds mog");
+  const crystal = row("cds crystal"), text = row("cds text"), bold = row("cds bold");
+  const bubble = row("cds bubble"), utext = row("cds user text"), uacts = row("cds user acts");
+  const cds = (label, ok, detail) => {
+    checks++;
+    if (ok) console.log(`ok   ${label.padEnd(16)} ${detail}`);
+    else { bad++; console.log(`FAIL ${label.padEnd(16)} ${detail}`); }
+  };
+  cds("cds window", win.borderTopWidth === "2px" && /linear-gradient/.test(win.backgroundImage) && win.animationName === "ff-reply-breathe",
+    `the content column is the window (${win.borderTopWidth}, ${String(win.backgroundImage).slice(0, 15)}…, ${win.animationName})`);
+  cds("cds crystal", /^img#/.test(crystal.backgroundImage) && crystal.width === "16px",
+    `the crystal hangs in its gutter (${crystal.backgroundImage}, ${crystal.width})`);
+  cds("cds unframed", wrap.borderTopWidth === "0px" && wrap.backgroundImage === "none" && wrap.paddingLeft === "0px" &&
+    acts.borderTopWidth === "0px" && acts.backgroundImage === "none",
+    `the reply wrapper and its action row stay bare (wrapper ${wrap.borderTopWidth}/${wrap.paddingLeft}, actions ${acts.borderTopWidth})`);
+  cds("cds mog", mog.content === '""' && /^img#/.test(mog.backgroundImage) && mog.animationName === "none",
+    `Mog stands under the newest reply, parked while nothing works (${mog.content}, ${mog.backgroundImage}, ${mog.animationName})`);
+  cds("cds text", /Press Start/.test(text.fontFamily) && text.fontSize === "12px" && text.color === "rgb(255, 255, 255)" &&
+    bold.color === "rgb(255, 215, 94)",
+    `reply text in Press Start at 12px, white, bold in gold (${text.fontSize}, ${text.color}, ${bold.color})`);
+  cds("cds bubble", /linear-gradient/.test(bubble.backgroundImage) && bubble.borderTopWidth === "2px" &&
+    /Press Start/.test(utext.fontFamily) && uacts.borderTopWidth === "0px",
+    `your bubble is a menu window in Press Start, its action row bare (${bubble.borderTopWidth}, ${uacts.borderTopWidth})`);
 }
 
 // Voice mode's microphone menu sits beside the voice chip, not over it.
@@ -1061,6 +1122,10 @@ const GEM4_PAGE = (attrs, head) => `<!doctype html>
   mat-nav-list { display: block; }
   /* Gemini 4's own margin on the top group's container. */
   .top-action-list { margin-left: 8px; }
+  /* The XL grid: the conversation spans the chat area (1200px here). */
+  .enable-extended-and-xl-grid { width: 1200px; }
+  model-response, response-container, message-content, table-block, message-actions { display: block; }
+  message-actions { height: 32px; }
 </style>
 ${head}
 </head>
@@ -1085,6 +1150,19 @@ ${head}
   <div id="conv"><input-container><div class="input-area-container" style="border-radius:28px">
     <input-area-v2><div class="input-area"><rich-textarea><div class="ql-editor"></div></rich-textarea></div></input-area-v2>
   </div></input-container></div>
+  <!-- Replies on the XL grid (live chain, 2026-10-14): the window centres in
+       the full-width response container; Mog must stand at its left edge.
+       The second reply holds a table, so its window runs full width. -->
+  <div class="enable-extended-and-xl-grid">
+    <model-response data-tema-reply="1" data-tema-latest id="xlreply"><div><response-container><div class="response-container">
+      <div><div class="response-container-content"><message-content><div class="markdown"><p>A reply in the reading column.</p></div></message-content></div></div>
+      <div><message-actions></message-actions></div>
+    </div></response-container></div></model-response>
+    <model-response data-tema-reply="1" data-tema-latest id="xltable"><div><response-container><div class="response-container">
+      <div><div class="response-container-content"><message-content><div class="markdown"><table-block><table><tr><td>a wide table</td></tr></table></table-block></div></message-content></div></div>
+      <div><message-actions></message-actions></div>
+    </div></response-container></div></model-response>
+  </div>
 </main>
 <script>
 window.addEventListener("load", () => {
@@ -1119,6 +1197,14 @@ window.addEventListener("load", () => {
     listLeft: Math.round(document.getElementById("listbox").getBoundingClientRect().left),
     activeRing: cs("#newchat").boxShadow,
     hand: (() => { const h = cs("#newchat", "::before"); return [h.width, h.height, h.left, h.top].join(" "); })(),
+    // Where Mog stands against his reply's window: [window left, Mog left].
+    mog: ["#xlreply", "#xltable"].map((id) => {
+      const rc = document.querySelector(id + " .response-container");
+      const win = document.querySelector(id + " .response-container-content");
+      const after = getComputedStyle(rc, "::after");
+      return [Math.round(win.getBoundingClientRect().left),
+        Math.round(rc.getBoundingClientRect().left + parseFloat(after.left)), after.content];
+    }),
   };
   document.title = "PROBE:" + JSON.stringify(out);
 });
@@ -1153,6 +1239,11 @@ g4check("gem4 new chat box", g4.topLeft === g4.listLeft && g4.activeRing === "no
   `New chat's box lines up with the boxes below (${g4.topLeft} vs ${g4.listLeft}) and its active row adds no second ring (${g4.activeRing})`);
 g4check("gem4 tab colours", g4.selected === "rgb(36, 28, 4)" && g4.other === "rgb(219, 228, 255)",
   `dark on gold when selected (${g4.selected}), menu text otherwise (${g4.other})`);
+for (const [i, kind] of [[0, "a column reply"], [1, "a full-width table reply"]]) {
+  const [winLeft, mogLeft, content] = g4.mog[i];
+  g4check(`gem4 mog ${i ? "table" : "column"}`, content === '""' && Math.abs(mogLeft - (winLeft + 2)) <= 1,
+    `under ${kind} Mog stands at the window's left edge (Mog ${mogLeft}, window ${winLeft})`);
+}
 console.log(bad
   ? `\n${bad} check(s) failed`
   : `\nrender clean — ${checks} properties read across ${probes} probes on three sites`);

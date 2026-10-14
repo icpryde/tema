@@ -225,13 +225,27 @@
   }
 
   function markClaude() {
-    // claude.ai shows its working state itself (the status row under the
-    // reply), so only the reply stamp is needed here.
-    if (!want.has("replies")) return;
-    for (const el of document.querySelectorAll("div[data-is-streaming]")) {
-      const body = el.querySelector(".font-claude-response");
-      stampReply(el, !!body && hasReplyText(body));
+    // Every reply is a div[data-is-streaming]. Until 2026-10 its body was
+    // .font-claude-response. The rebuilt transcript (2026-10, the "cds"
+    // design system) keeps the attribute on div[data-cds="AssistantMessage"],
+    // which holds the status row (data-cds="TurnStatus", the thinking
+    // summary, marked data-find-omitted), the body ([data-transcript-engine-
+    // root] > .prose) and the action row; the body is the part to read.
+    const msgs = document.querySelectorAll("div[data-is-streaming]");
+    if (want.has("replies")) {
+      for (const el of msgs) {
+        const body = el.querySelector(".font-claude-response, [data-transcript-engine-root]");
+        stampReply(el, !!body && hasReplyText(body));
+      }
     }
+    // Working: the old build showed it itself (the status row's glyph, which
+    // the theme dresses in CSS alone). The rebuild has no such slot, so the
+    // newest reply is stamped for as long as it says it is streaming; that
+    // attribute holds from the moment the reply mounts, through the
+    // thinking, to the last token. The newest is the last: the rebuild has
+    // no empty next-turn placeholder.
+    holdWorking(msgs.length > 0 && msgs[msgs.length - 1].getAttribute("data-is-streaming") === "true",
+      msgs[msgs.length - 1] || null);
   }
 
   /**
@@ -349,12 +363,25 @@
     return 2 * (Math.min(mid - left, right - mid) - GROW_MARGIN);
   }
 
+  // What a table has to fit inside: the reply itself on the old build; on
+  // the 2026-10 transcript the window is the reply's content column (the
+  // child holding the body or the status row), and the wrapper around it is
+  // bare. --tema-grow still goes on the wrapper, which the column fills.
+  function frameOf(reply) {
+    if (!reply.hasAttribute("data-cds")) return reply;
+    for (const c of reply.children) {
+      if (c.querySelector('[data-transcript-engine-root], [data-cds="TurnStatus"]')) return c;
+    }
+    return reply;
+  }
+
   function syncWide() {
     if (SITE !== "claude") return;
     for (const win of document.querySelectorAll("div[data-is-streaming][data-tema-reply]")) {
       const cur = parseFloat(win.style.getPropertyValue(GROW)) || 0;
+      const frame = frameOf(win);
       let need = 0;
-      for (const t of win.querySelectorAll("table")) need = Math.max(need, tableNeed(t, win, cur));
+      for (const t of frame.querySelectorAll("table")) need = Math.max(need, tableNeed(t, frame, cur));
       let grow = 0;
       if (need > 1) {
         const base = win.getBoundingClientRect().width - cur;
@@ -405,15 +432,26 @@
 
   /* ------------------------------------------------------------ wiring */
 
+  // claude.ai says a reply is done by flipping data-is-streaming on it, and
+  // the engine's observer only watches the tree, so a run whose last change
+  // was that flip left the working stamp up until something else moved.
+  // This one watches that attribute alone.
+  const streamWatch = new MutationObserver(() => T.schedule());
+
   T.useEngine({
     start(ctx) {
       want = new Set(ctx.theme.signals || []);
+      if (want.has("working") && SITE === "claude") {
+        streamWatch.observe(document.documentElement,
+          { attributes: true, attributeFilter: ["data-is-streaming"], subtree: true });
+      }
       if (want.has("icons")) markIcons(document.documentElement);
       if (want.has("wide-tables") && SITE === "claude" && document.fonts) {
         document.fonts.addEventListener("loadingdone", onFonts);
       }
     },
     stop() {
+      streamWatch.disconnect();
       clearReplies();
       clearWide();
       clearIcons();

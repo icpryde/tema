@@ -1157,6 +1157,115 @@ const GEMINI4_PAGE = `<!doctype html>
 </body>
 </html>`;
 
+// claude.ai's rebuilt transcript (2026-10, live markup 2026-10-14): turns are
+// div[data-cds="UserMessage"] / div[data-cds="AssistantMessage"], the reply
+// still carries data-is-streaming, its body is [data-transcript-engine-root]
+// > .prose, the thinking summary is a TurnStatus row marked
+// data-find-omitted, the action row sits inside the reply, and there is no
+// empty next-turn placeholder.
+const CLAUDE_CDS_PAGE = `<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>smoke-claude-cds</title>
+<script>
+  localStorage.clear();
+  localStorage.setItem("sync:sites", JSON.stringify({ claude: "final-fantasy" }));
+  window.__TEMA_TEST_SITE = "claude";
+</script>
+</head>
+<body class="font-ui">
+<main class="dframe-content"><div data-testid="transcript-list"><div role="feed" id="feed">
+  <div data-testid="transcript-row"><div role="article"><div data-transcript-row>
+    <div data-cds="UserMessage" data-turn-key><div class="relative flex"><div><div class="cds-user-message-body">
+      <div data-testid="user-message"><div class="contents"><p>whats pikas full name</p></div></div>
+    </div></div></div><div data-cds="MessageActions" role="toolbar"><button data-cds="Button" aria-label="Edit"></button></div></div>
+  </div></div></div>
+  <div data-testid="transcript-row"><div role="article"><div data-transcript-row><div data-reply-scope>
+    <div data-cds="AssistantMessage" data-testid="assistant-message" data-turn-key data-is-streaming="false" id="first">
+      <h2 class="sr-only" data-find-omitted>Claude said:</h2>
+      <div class="flex min-w-0 flex-col">
+        <div data-cds="TurnStatus" data-find-omitted data-state="done"><span>Figuring out what Pika means.</span></div>
+        <div class="min-w-0"><div class="grid"><div data-transcript-engine-root class="contents">
+          <div class="prose"><div class="standard-markdown"><p>Pika could mean a few things.</p></div></div>
+        </div></div></div>
+      </div>
+      <div class="print:mt-xs"><div data-cds="MessageActions" role="toolbar" data-testid="message-actions">
+        <button data-cds="Button" aria-label="Copy"></button><span role="status" class="sr-only"></span>
+      </div></div>
+    </div>
+  </div></div></div></div>
+</div></div></main>
+<script>
+  window.__errors = [];
+  addEventListener("error", (e) => window.__errors.push("error: " + (e.message || e)));
+  addEventListener("unhandledrejection", (e) => window.__errors.push("rejection: " + e.reason));
+  const realError = console.error;
+  console.error = (...a) => { window.__errors.push("console.error: " + a.join(" ")); realError(...a); };
+</script>
+<script src="../lib/ext-shim.js"></script>
+<script src="../../src/registry.js"></script>
+<script src="../../src/settings.js"></script>
+<script src="../../src/content/core.js"></script>
+<script src="../../src/content/signals.js"></script>
+<script src="../../themes/final-fantasy/runtime.js"></script>
+<script>
+  const wear = (sites) => chrome.storage.sync.set({ sites });
+  window.__drive = async () => {
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const err = (m) => window.__errors.push("claude-cds: " + m);
+    const first = document.getElementById("first");
+    await wait(600);
+
+    if (!first.hasAttribute("data-tema-reply")) err("a settled reply was not stamped data-tema-reply — no window, no crystal, no font");
+    if (!first.hasAttribute("data-tema-latest")) err("the newest reply was not stamped data-tema-latest — Mog has no perch");
+    if (first.hasAttribute("data-tema-working")) err("a settled reply was stamped working");
+
+    // A new turn: the reply mounts streaming, thinking first. Its summary
+    // row already holds text (marked data-find-omitted) and its body is
+    // empty, so it must be WORKING but not yet a reply (no window yet).
+    const row = document.createElement("div");
+    row.setAttribute("data-testid", "transcript-row");
+    row.innerHTML =
+      '<div role="article"><div data-transcript-row><div data-reply-scope>' +
+      '<div data-cds="AssistantMessage" data-testid="assistant-message" data-turn-key data-is-streaming="true" id="next">' +
+      '<h2 class="sr-only" data-find-omitted>Claude said:</h2>' +
+      '<div class="flex min-w-0 flex-col">' +
+      '<div data-cds="TurnStatus" data-find-omitted data-state="thinking"><span>Thinking about moogles</span></div>' +
+      '<div class="min-w-0"><div class="grid"><div data-transcript-engine-root class="contents"></div></div></div>' +
+      '</div></div></div></div></div>';
+    document.getElementById("feed").append(row);
+    const next = document.getElementById("next");
+    await wait(600);
+    if (!next.hasAttribute("data-tema-working")) err("a streaming reply was not stamped working — Mog would not hop");
+    if (next.hasAttribute("data-tema-reply")) err("the thinking summary stamped the reply — an empty window would open mid-thinking");
+    if (first.hasAttribute("data-tema-working")) err("the previous reply was stamped working");
+
+    // The answer streams into the body.
+    next.querySelector("[data-transcript-engine-root]").innerHTML =
+      '<div class="prose"><div class="standard-markdown"><p>Mog.</p></div></div>';
+    await wait(600);
+    if (!next.hasAttribute("data-tema-reply")) err("streamed answer text did not stamp the reply");
+    if (!next.hasAttribute("data-tema-latest") || first.hasAttribute("data-tema-latest")) err("latest did not move to the new reply");
+    if (!next.hasAttribute("data-tema-working")) err("working dropped while the reply still streams");
+
+    // Done: the stamp holds through the grace window, then clears.
+    next.setAttribute("data-is-streaming", "false");
+    await wait(2400);
+    if (next.hasAttribute("data-tema-working")) err("working outlived the run by more than the grace window");
+    if (!next.hasAttribute("data-tema-reply") || !next.hasAttribute("data-tema-latest")) err("the finished reply lost its stamps");
+
+    wear({ claude: null });
+    await wait(500);
+    const left = document.querySelectorAll("[data-tema-reply], [data-tema-latest], [data-tema-working]");
+    if (left.length) err(left.length + " stamps left behind after the theme went off");
+    return window.__errors;
+  };
+  window.__drive().then((errs) => {
+    document.title = "SMOKE:" + (errs.length ? errs.join(" | ") : "clean");
+  });
+</script>
+</body>
+</html>`;
+
 let failed = 0;
 
 async function drivePage(label, html, budget) {
@@ -1188,6 +1297,7 @@ async function drivePage(label, html, budget) {
 }
 
 await drivePage("smoke (claude)", PAGE, 22000);
+await drivePage("smoke (claude 2026-10 transcript)", CLAUDE_CDS_PAGE, 9000);
 await drivePage("smoke (chatgpt)", GPT_PAGE, 24000);
 await drivePage("smoke (chatgpt app shell)", GPT_SHELL_PAGE, 26000);
 await drivePage("smoke (gemini)", GEMINI_PAGE, 24000);

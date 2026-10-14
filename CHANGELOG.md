@@ -12,6 +12,16 @@
 - Claude: voice mode and its microphone menu (the ⌄) are one split control,
   and now look like one: a single chip with two halves. Chipped separately,
   the ⌄ (tucked 6px under by Claude) drew over the voice button.
+- Claude rebuilt its chat page (2026-10), and replies had lost the theme:
+  no window, no crystal, no pixel type, no Mog. Replies are menu windows
+  again, with the action row (Copy, the thumbs, Retry) outside the window
+  as before; your messages are menu windows in the pixel face; and Mog
+  lives under the newest reply as he does on ChatGPT, hopping while Claude
+  thinks and writes. The colourful-text option and the wide-table windows
+  follow the new page too.
+- Gemini: Mog stands under the reply again. Gemini 4's wide layout centres
+  each reply in a reading column while the box around it spans the screen,
+  and Mog had stayed at that box's far left edge.
 
 ## 1.0.0 — 2026-10-13
 

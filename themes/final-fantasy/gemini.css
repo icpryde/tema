@@ -1237,6 +1237,25 @@ html[data-tema="final-fantasy"] model-response[data-tema-working] .response-cont
     ff-moogle-hop 0.62s ease-in-out infinite;
 }
 
+/* Gemini 4's XL grid: the response container spans the whole chat area
+   while the window keeps to the centred column (see "reply windows"), so
+   left: 2px stranded Mog at the far left of the screen, nowhere near the
+   reply. He stands at the window's left edge instead, worked out the way
+   the window is placed: the column plus the window's 58px, centred, then
+   the window's 13px recentring. Code and images widen the column to 740px;
+   a reply with a wide block is full width, where 2px is right again. The
+   same numbers hold while the reply is still loading, so Mog waits where
+   its window will open. */
+html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response:is([data-tema-latest], [data-tema-working]) .response-container::after {
+  left: calc(max(0px, (100% - var(--bard-chat-window-content-width-default, 708px) - 58px) / 2) - 11px);
+}
+html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response:is([data-tema-latest], [data-tema-working]) .response-container:has(.response-container-content :is(code-block, single-image, image-carousel, generated-video, deep-zoom))::after {
+  left: calc(max(0px, (100% - 740px - 58px) / 2) - 11px);
+}
+html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response:is([data-tema-latest], [data-tema-working]) .response-container:has(.response-container-content :is(table-block, compare-table, product-list, mini-app, .flex-container-root, table))::after {
+  left: 2px;
+}
+
 /* While a new turn is mid-run it owns the only Mog — the previous reply's
    parked one stands down so he never doubles. */
 html[data-tema="final-fantasy"]:has(model-response[data-tema-working]) model-response[data-tema-latest]:not([data-tema-working]) .response-container::after {

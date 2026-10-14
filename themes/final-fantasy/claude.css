@@ -140,11 +140,18 @@ html[data-tema="final-fantasy"] select {
    body text takes a small OPTICAL step down below. UI chrome above stays
    Silkscreen:
    it is more compact for sidebar rows, and small-caps labels read as
-   deliberate menu styling there. */
+   deliberate menu styling there.
+   The 2026-10 transcript renamed both message bodies: a reply's is the
+   .prose inside div[data-cds="AssistantMessage"], and yours is
+   [data-testid="user-message"]. */
 html[data-tema="final-fantasy"] .font-claude-response,
 html[data-tema="final-fantasy"] .font-claude-response *,
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"] .prose,
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"] .prose *,
 html[data-tema="final-fantasy"] [data-user-message-bubble="true"],
 html[data-tema="final-fantasy"] [data-user-message-bubble="true"] *,
+html[data-tema="final-fantasy"] [data-testid="user-message"],
+html[data-tema="final-fantasy"] [data-testid="user-message"] *,
 html[data-tema="final-fantasy"] [data-testid="chat-input"],
 html[data-tema="final-fantasy"] [data-testid="chat-input"] * {
   font-family: var(--ff-body) !important;
@@ -224,8 +231,12 @@ html[data-tema="final-fantasy"] [data-new-page-greeting-text] {
 
 /* ---------------------------------------------------------- menu windows */
 
-/* The signature: gradient fill, hard white frame, inner bevel, hard drop. */
-html[data-tema="final-fantasy"] [data-user-message-bubble="true"] {
+/* The signature: gradient fill, hard white frame, inner bevel, hard drop.
+   Your bubble on the 2026-10 transcript is the child of
+   div[data-cds="UserMessage"] holding the text; its sibling is the action
+   row (time, Retry, Edit, Copy), which stays bare. */
+html[data-tema="final-fantasy"] [data-user-message-bubble="true"],
+html[data-tema="final-fantasy"] [data-cds="UserMessage"] > div:has([data-testid="user-message"]) {
   background: var(--ff-window-user) !important;
   border: 2px solid var(--ff-frame) !important;
   border-radius: 7px !important;
@@ -256,8 +267,17 @@ html[data-tema="final-fantasy"] [role="option"]:hover {
    just needs to wrap around it rather than shift anything. */
 /* [data-tema-reply] is load-bearing. claude.ai keeps an EMPTY
    div[data-is-streaming] mounted as a placeholder for the next turn; framing
-   that produced a stray empty window floating above the composer. */
-html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply] {
+   that produced a stray empty window floating above the composer.
+
+   The 2026-10 transcript moved the action row (Copy, Read aloud, the
+   thumbs, Retry) INSIDE the reply: div[data-cds="AssistantMessage"] (still
+   div[data-is-streaming]) holds a screen-reader heading, the content column
+   (the status row, then the body), and the action row. The window frames
+   the content column, so the action row stays outside it as on the other
+   two sites and as it did here before. :not([data-cds]) keeps the old
+   frame off the new wrapper. */
+html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]:not([data-cds]),
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"]) {
   background: var(--ff-window-reply) !important;
   border: 2px solid var(--ff-frame) !important;
   border-radius: 7px !important;
@@ -306,7 +326,8 @@ html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply][style*="
   }
 }
 
-html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-latest][data-tema-reply] {
+html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-latest][data-tema-reply]:not([data-cds]),
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-latest][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"]) {
   animation: ff-reply-breathe 4.2s ease-in-out infinite;
 }
 
@@ -479,15 +500,20 @@ html[data-tema="final-fantasy"] .ff-party-member:hover {
 /* claude.ai renders no avatar next to a reply, so the crystal *is* the
    speaker mark. The message column only leaves ~16px of natural gutter, which
    isn't enough and would put the crystal over the sidebar — so indent the
-   reply and hang the crystal in the space that creates. */
-html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply] {
+   reply and hang the crystal in the space that creates. On the 2026-10
+   transcript the window (and so the crystal) is the reply's content column. */
+html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]:not([data-cds]) {
   /* Claude already ships `relative` on this node, but the crystal's placement
      is not worth betting on a utility class staying put. */
   position: relative;
   padding-left: 34px;
 }
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"]) {
+  position: relative;
+}
 
-html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]::before {
+html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]:not([data-cds])::before,
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"])::before {
   content: "";
   position: absolute;
   /* Inside the window's left gutter, clear of the 2px frame — at left:5/top:0
@@ -506,8 +532,10 @@ html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]::before 
 
 /* Reclaim the width on narrow screens. */
 @media (max-width: 900px) {
-  html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply] { padding-left: 10px !important; }
-  html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]::before { display: none; }
+  html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]:not([data-cds]),
+  html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"]) { padding-left: 10px !important; }
+  html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]:not([data-cds])::before,
+  html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"])::before { display: none; }
 }
 
 /* ------------------------------------------------ sidebar edge + cursor */
@@ -729,6 +757,45 @@ html[data-tema="final-fantasy"] main:has(button[class*="group/status"]:not([data
 html[data-tema="final-fantasy"] main:has(button[class*="group/status"]:not([data-tema-reply] *)) div[class~="text-accent-brand"]:has(svg)::after,
 html[data-tema="final-fantasy"] main:has(button[class*="group/status"]:not([data-tema-reply] *)) div[class~="text-brand-200"]:has(svg)::after {
   content: none !important;
+}
+
+/* The 2026-10 transcript has neither slot: the status row is a div
+   (data-cds="TurnStatus") with no glyph, and no logo mounts under the
+   reply, so Mog had nowhere to stand. He moves in under the newest reply
+   the way he lives on chatgpt.com and Gemini: below the action row, level
+   with the window's left edge. He stands once the reply is done
+   (data-tema-latest) and hops while Claude works (the page signals stamp
+   data-tema-working on the newest reply while it says data-is-streaming=
+   "true", which holds from the moment it mounts, thinking included). A new
+   turn mid-run owns the only Mog, so the last reply's one stands down.
+   Centre-positioned, because ff-moogle-hop above carries the centring. */
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"]:is([data-tema-latest], [data-tema-working]) {
+  position: relative;
+}
+
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"]:is([data-tema-latest], [data-tema-working])::after {
+  content: "";
+  position: absolute;
+  left: calc(2px + var(--ff-art-moogle-w) * 0.75px);
+  top: calc(100% + 6px + var(--ff-art-moogle-h) * 0.75px);
+  transform: translate(-50%, -50%);
+  width: calc(var(--ff-art-moogle-w) * 1.5px);
+  height: calc(var(--ff-art-moogle-h) * 1.5px);
+  background-image: var(--ff-art-moogle);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-working]::after {
+  animation:
+    ff-moogle-frames 0.62s steps(1) infinite,
+    ff-moogle-hop 0.62s ease-in-out infinite;
+}
+
+html[data-tema="final-fantasy"]:has([data-cds="AssistantMessage"][data-tema-working]) [data-cds="AssistantMessage"][data-tema-latest]:not([data-tema-working])::after {
+  content: none;
 }
 
 /* Mog introduces himself.
@@ -1347,6 +1414,9 @@ html[data-tema="final-fantasy"] .ff-shooting-star {
     div[class*="cursor-text"]:has([data-testid="chat-input"])::before,
   html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-latest],
   html[data-tema="final-fantasy"] div[data-is-streaming][data-tema-reply]::before,
+  html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"]),
+  html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-reply] > div:has([data-transcript-engine-root], [data-cds="TurnStatus"])::before,
+  html[data-tema="final-fantasy"] [data-cds="AssistantMessage"][data-tema-working]::after,
   html[data-tema="final-fantasy"] .ff-party-member,
     html[data-tema="final-fantasy"] .ff-shooting-star,
   html[data-tema="final-fantasy"] div:has(> svg[data-cds="Spark"])::after,
@@ -1439,42 +1509,43 @@ html[data-tema="final-fantasy"] div[class*="rounded-b-["][class*="bg-surface-1"]
 
    Picks out markdown structure the way an old JRPG menu picks out keywords:
    gold for emphasis, cyan for italics, magenta for headings, green for code.
-   Scoped to the reply body so the user's own message bubbles, the composer and
-   the sidebar are untouched. */
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response strong,
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response b {
+   Scoped to the reply body (.font-claude-response, or the .prose of a
+   2026-10 reply) so the user's own message bubbles, the composer and the
+   sidebar are untouched. */
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) strong,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) b {
   color: var(--ff-gold) !important;
   text-shadow: 1px 1px 0 rgba(3, 6, 22, 0.8);
 }
 
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response em,
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response i {
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) em,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) i {
   color: var(--ff-crystal-cyan) !important;
   font-style: italic !important;
 }
 
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response h1,
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response h2,
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response h3,
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response h4 {
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) h1,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) h2,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) h3,
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) h4 {
   color: #ff8ad8 !important;
   text-shadow: 1px 1px 0 rgba(3, 6, 22, 0.85);
 }
 
 /* Inline code only. Fenced blocks keep their own syntax highlighting, which
    this would otherwise flatten to one colour. */
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response code:not(pre code) {
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) code:not(pre code) {
   color: #7ce8a4 !important;
 }
 
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response a {
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) a {
   color: #9db4ff !important;
   text-decoration-color: rgba(157, 180, 255, 0.5) !important;
 }
 
 /* List markers pick up the gold too, which is what makes a bulleted list read
    as a JRPG menu rather than a document. */
-html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] .font-claude-response li::marker {
+html[data-tema="final-fantasy"][data-tema-opt~="rich-text"] :is(.font-claude-response, [data-cds="AssistantMessage"] .prose) li::marker {
   color: var(--ff-gold) !important;
 }
 

@@ -281,6 +281,23 @@ const claudeReply = (id, body) => `
     </div>
   </div></div></div>`;
 
+// The 2026-10 transcript (live markup, 2026-10-14): the reply wrapper is
+// div[data-cds="AssistantMessage"] and the WINDOW is its content column,
+// with the action row beside it inside the wrapper. The table has to fit
+// the column's content box, not the wrapper's.
+const claudeCdsReply = (id, body) => `
+  <div data-cds="AssistantMessage" data-is-streaming="false" class="relative flex w-full min-w-0 flex-col" style="display:flex;flex-direction:column" id="${id}">
+    <div class="flex min-w-0 flex-col" style="display:flex;flex-direction:column;min-width:0">
+      <div data-cds="TurnStatus" data-find-omitted data-state="done"><span>Thought about tables</span></div>
+      <div style="min-width:0"><div style="display:grid;grid-template-columns:repeat(1,minmax(0,1fr))"><div data-transcript-engine-root style="display:contents">
+        <div class="prose"><div class="standard-markdown grid" style="display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:10px">
+          ${body}
+        </div></div>
+      </div></div></div>
+    </div>
+    <div><div data-cds="MessageActions" role="toolbar"><button aria-label="Copy">c</button></div></div>
+  </div>`;
+
 const CLAUDE_PAGE = `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8">
@@ -309,6 +326,7 @@ const CLAUDE_PAGE = `<!doctype html>
   ${claudeReply("fits", "<p>A table that fits the column is left alone.</p>" + claudeTable(3, (i) => "Fits " + (i + 1)))}
   ${claudeReply("wide", "<p>Five columns cannot fit the column.</p>" + claudeTable(5, (i) => "Wide " + (i + 1)))}
   ${claudeReply("huge", "<p>Twenty columns cannot fit even the widest window.</p>" + claudeTable(20, (i) => "Huge " + (i + 1)))}
+  ${claudeCdsReply("cdswide", "<p>Five columns on the 2026-10 transcript.</p>" + claudeTable(5, (i) => "Cds " + (i + 1)))}
 </div></div></main>
 <script>
   window.__errors = [];
@@ -337,16 +355,24 @@ window.addEventListener("load", async () => {
     const win = document.getElementById(id);
     const w = win.getBoundingClientRect();
     const s = win.querySelector(".md-table-scroll");
+    // The framed box: the reply itself, or its content column on the
+    // 2026-10 transcript. spill = how far the table's scroller runs past
+    // that frame's content box.
+    const frame = [...win.children].find((c) => c.querySelector("[data-transcript-engine-root]")) || win;
+    const fcs = getComputedStyle(frame), fr = frame.getBoundingClientRect();
+    const inner = fr.right - parseFloat(fcs.paddingRight) - parseFloat(fcs.borderRightWidth);
     return {
       stamped: win.hasAttribute("data-tema-reply"),
       grow: win.style.getPropertyValue("--tema-grow") || "",
       win: Math.round(w.width),
       offCentre: Math.round(Math.abs((w.left + w.right) / 2 - colMid)),
       scroll: s ? s.scrollWidth - s.clientWidth : null,
+      spill: s ? Math.round(s.getBoundingClientRect().right - inner) : null,
+      framed: fcs.borderTopWidth,
     };
   };
   const out = { colInner: Math.round(colInner), room: Math.round(room) };
-  for (const id of ["fits", "wide", "huge"]) out[id] = snap(id);
+  for (const id of ["fits", "wide", "huge", "cdswide"]) out[id] = snap(id);
 
   // A regenerated reply whose table now fits goes back to the column.
   document.querySelector("#wide .md-table-scroll").remove();
@@ -472,6 +498,12 @@ check(!!c.wide.grow && c.wide.scroll <= 1, "claude: a table too wide for the col
 check(c.wide.offCentre <= 1, "claude: evenly both ways (centred on the column)", `off=${c.wide.offCentre}`);
 check(near(c.huge.win, c.room, 2) && c.huge.scroll > 0, "claude: a table past the room stops at it and scrolls inside", `win=${c.huge.win} room=${c.room} scroll=${c.huge.scroll}`);
 check(!c.shrunk.grow && c.shrunk.win === c.fits.win, "claude: once the wide table is gone the window returns to the column", `grow='${c.shrunk.grow}' win=${c.shrunk.win}`);
+{
+  const r = c.cdswide;
+  check(r.stamped && r.framed === "2px", "claude 2026-10: the reply is stamped and its content column framed", `framed=${r.framed}`);
+  check(!!r.grow && r.scroll <= 1 && r.spill <= 1, "claude 2026-10: a table too wide grows the window until it fits inside the frame", `grow=${r.grow} scroll=${r.scroll} spill=${r.spill}`);
+  check(r.offCentre <= 1, "claude 2026-10: evenly both ways (centred on the column)", `off=${r.offCentre}`);
+}
 check(c.offLeft === 0, "claude: turning the theme off clears every grow stamp", `${c.offLeft} left`);
 
 console.log(bad ? `\n${bad} check(s) failed` : "\nall wide-reply checks passed");

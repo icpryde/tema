@@ -18,6 +18,16 @@ carry the detail beside each rule; this is the map.
   lands with the first real answer text.
 - The empty next-turn placeholder is mounted most of the time: pick "newest
   reply" from stamped replies only.
+- The 2026-10 transcript (the "cds" design system, probed 2026-10-14) keeps
+  `data-is-streaming` but on `div[data-cds="AssistantMessage"]`, which holds
+  a screen-reader `h2`, the content column (the `data-cds="TurnStatus"`
+  thinking summary, marked `[data-find-omitted]`, then the body
+  `[data-transcript-engine-root] > .prose`) and the action row
+  (`data-cds="MessageActions"`). The window frames the content column. Your
+  turn is `div[data-cds="UserMessage"]`: the bubble is its child holding
+  `[data-testid="user-message"]`, beside its own action row. There is no
+  next-turn placeholder and no working glyph; `data-is-streaming="true"`
+  holds for the whole run, and the `working` signal follows it.
 - The working glyph is `svg[data-cds="Spark"]` (and a sprite-strip logo);
   a `:has()` nested in a `:has()` is invalid CSS and drops the whole rule
   silently — `tools/tests/glyph.mjs` counts parsed rules for that reason.
@@ -59,6 +69,11 @@ carry the detail beside each rule; this is the map.
   `thinking-overlay`; `.has-thoughts` wraps the real answer too.
 - `div.response-container` nests inside the `<response-container>` element:
   key on the class only, or anything drawn appears twice.
+- The "extended and XL grid" layout (`.enable-extended-and-xl-grid`): the
+  response container spans the whole chat area and each block centres in a
+  708px column (740px for code and images, full width for tables and other
+  wide blocks). Anything placed against the container's edge, like the reply
+  window or Mog, has to follow the column instead.
 - A hidden `mat-progress-spinner` idles in the history scroller at rest, so
   busy tests scope spinners to the newest reply.
 - The composer box is `.input-area-container` (a `fieldset` before Gemini 4,
