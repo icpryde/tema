@@ -645,6 +645,8 @@ const GPT_BODY = `
 <div data-radix-menu-content role="menu"><div role="menuitem">Add photos</div></div>
 <div popover="manual" role="tooltip" class="popover">a tooltip</div>
 <div id="app-shell-sidebar">
+  <!-- The row for the page you're on: New chat, on a fresh chat. -->
+  <button type="button" class="sidebar-item" aria-current="page" id="gptcurrent"><div class="flex min-w-0 flex-1"><span>New chat</span></div></button>
   <nav data-app-navigation-rail>
     <div class="relative mb-1 w-full overflow-hidden"><div class="flex min-w-0 flex-1 items-center gap-0 sidebar-item justify-center"><div class="flex min-w-0 flex-1 justify-center">
       <button type="button" class="Button-fx" data-color="secondary" data-variant="ghost" data-size="xl" aria-label="Open profile menu" aria-haspopup="menu"><span class="ButtonInner-fx"><span class="relative isolate inline-flex shrink-0"><img class="shrink-0 object-cover rounded-full size-6" alt="" src="${AVATAR}"></span></span></button>
@@ -702,6 +704,7 @@ const GPT_PROBES = JSON.stringify([
   ["gpt tooltip",      '[role="tooltip"]',                       null,       ["backgroundImage", "borderTopWidth", "fontFamily"]],
   ["gpt choco sky",    ".ff-choco-sky",                        null,       ["position", "zIndex"]],
   ["gpt choco spr",    ".ff-choco-sky .ff-choco",            null,       ["animationName", "backgroundSize"]],
+  ["gpt current row",  "#gptcurrent",                            null,       ["backgroundImage", "animationName"]],
   ["gpt prof window",  PROFILE_ROW,                              null,       ["backgroundImage", "borderTopWidth", "borderRadius"]],
   ["gpt prof divider", PROFILE_ROW,                              "::after",  ["content", "borderBottomWidth"]],
   ["gpt prof photo",   PROFILE_ROW + " img",                     null,       ["opacity"]],
@@ -811,6 +814,9 @@ const GPT_MUST = {
   // own ::after is ChatGPT's divider, which it fades on hover, so a crystal
   // there sat on the photo and blinked out under the pointer), and the
   // hairline gone from inside the frame. The rail's button matches.
+  // The cursor row, as on Gemini: a crystal-blue wash, never the gold that
+  // read as grey on the blue window.
+  "gpt current row":  ["backgroundImage", /linear-gradient\(rgba\(139, 234, 255/],
   "gpt prof window":  ["borderTopWidth", /^2px$/],
   "gpt prof divider": ["content", /^none$/],
   "gpt prof photo":   ["opacity", /^0$/],

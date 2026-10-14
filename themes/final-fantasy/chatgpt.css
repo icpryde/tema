@@ -1519,9 +1519,34 @@ html[data-tema="final-fantasy"] #app-shell-sidebar nav[role="navigation"] > :fir
   animation-range: 0px 2px;
 }
 
-/* The row for the page you're on reads as the menu cursor's row: gold. */
+/* The row for the page you're on is the cursor row of a JRPG menu, the same
+   as on Gemini: crystal-blue wash, thin white ring, and the windows' soft
+   glow, gently pulsing. It was a 14% gold wash, which over the blue window
+   mixed to a muddy grey (most visible on New chat, the current page of a
+   fresh chat). */
+@keyframes ff-row-glow {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(196, 220, 255, 0.85),
+      0 0 8px 1px rgba(134, 202, 255, 0.4),
+      0 1px 0 rgba(3, 6, 22, 0.5);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(226, 240, 255, 0.95),
+      0 0 14px 3px rgba(139, 234, 255, 0.6),
+      0 1px 0 rgba(3, 6, 22, 0.5);
+  }
+}
+
 html[data-tema="final-fantasy"] #app-shell-sidebar .sidebar-item[aria-current="page"] {
-  background: rgba(255, 215, 94, 0.14) !important;
+  background: linear-gradient(180deg, rgba(139, 234, 255, 0.3), rgba(92, 152, 255, 0.14)) !important;
+  border-radius: 5px !important;
+  animation: ff-row-glow 3.2s ease-in-out infinite;
+}
+html[data-tema="final-fantasy"] #app-shell-sidebar .sidebar-item[aria-current="page"],
+html[data-tema="final-fantasy"] #app-shell-sidebar .sidebar-item[aria-current="page"] :not(svg, svg *) {
+  color: #ffffff !important;
 }
 
 /* Section labels (Pinned / Projects / Recents) as small gold menu headers. */
@@ -1785,7 +1810,8 @@ html[data-tema="final-fantasy"] .ff-choco-c {
   html[data-tema="final-fantasy"] .ff-shooting-star,
   html[data-tema="final-fantasy"] section[data-tema-working] > div:first-of-type > div:first-child::after,
   html[data-tema="final-fantasy"] [data-turn-key][data-tema-working]::after,
-  html[data-tema="final-fantasy"] .__menu-item:not([class*="trailing"]):hover::before {
+  html[data-tema="final-fantasy"] .__menu-item:not([class*="trailing"]):hover::before,
+  html[data-tema="final-fantasy"] #app-shell-sidebar .sidebar-item[aria-current="page"] {
     animation: none !important;
   }
   html[data-tema="final-fantasy"] .ff-choco,

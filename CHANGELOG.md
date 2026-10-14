@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- ChatGPT: the row for the page you're on (New chat, on a fresh chat) is
+  the cursor row of a menu, as on Gemini: a crystal-blue wash with a thin
+  white ring and a soft glow. It was a faint gold wash, which over the blue
+  window mixed to a muddy grey.
+
 ## 1.0.1 — 2026-10-14
 
 - Claude rebuilt its chat page (2026-10), and replies had lost the theme:
