@@ -114,7 +114,9 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "themes/final-fantasy/assets/sounds/*.wav"
+        "themes/final-fantasy/assets/sounds/*.wav",
+        "themes/final-fantasy/assets/fonts/PressStart2P.woff2",
+        "themes/final-fantasy/assets/fonts/Silkscreen.woff2"
       ],
       "matches": [
         "https://claude.ai/*",

@@ -43,6 +43,18 @@ globalThis.TemaRegistry = Object.freeze({
         "icons",
         "wide-tables"
       ],
+      "fonts": [
+        {
+          "family": "FF Press Start",
+          "src": "themes/final-fantasy/assets/fonts/PressStart2P.woff2",
+          "descriptors": {}
+        },
+        {
+          "family": "FF Silkscreen",
+          "src": "themes/final-fantasy/assets/fonts/Silkscreen.woff2",
+          "descriptors": {}
+        }
+      ],
       "options": [
         {
           "id": "rich-text",

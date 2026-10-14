@@ -12,8 +12,9 @@
 //                     synchronously, with no fetch and no race)
 //   manifest.json     content_scripts (per site: the engine, then each
 //                     theme's script; each theme's shared styles, then its
-//                     site stylesheet) and web_accessible_resources. Every
-//                     other manifest key is left as written.
+//                     site stylesheet) and web_accessible_resources (the
+//                     files a theme fetches at runtime: its "files" and its
+//                     "fonts"). Every other manifest key is left as written.
 //
 // Adding a theme is: make the folder, write its theme.json, add its id to
 // themes/index.json, run this. Nothing else needs editing by hand.
@@ -95,6 +96,11 @@ export async function loadThemes() {
     for (const f of [].concat(t.ship || [])) {
       if (!(await exists(join(dir, f)))) fail(`${where}: ${f} does not exist`);
     }
+    const fonts = [].concat(t.fonts || []);
+    for (const f of fonts) {
+      if (typeof f.family !== "string" || !f.family) fail(`${where}: every font needs a "family"`);
+      if (!(await exists(join(dir, f.src || "")))) fail(`${where}: font ${f.src} does not exist`);
+    }
     if (t.card) {
       for (const k of ["html", "css"]) {
         if (t.card[k] && !(await exists(join(dir, t.card[k])))) fail(`${where}: card ${k} ${t.card[k]} does not exist`);
@@ -112,7 +118,7 @@ export async function loadThemes() {
       if (!a.id || !Array.isArray(a.buttons) || !a.buttons.length) fail(`${where}: action "${a.id}" needs buttons`);
     }
 
-    themes.push({ ...t, dir, siteCss, styles, script, files });
+    themes.push({ ...t, dir, siteCss, styles, script, files, fonts });
   }
   return { sites, themes };
 }
@@ -128,6 +134,8 @@ function registryJs({ sites, themes }) {
       colors: t.colors || null,
       sites: Object.fromEntries(Object.keys(t.siteCss).map((s) => [s, true])),
       signals: t.signals || [],
+      // Loaded by the engine through the FontFace API (see core.js).
+      fonts: t.fonts.map(({ family, src, ...descriptors }) => ({ family, src: `${t.dir}/${src}`, descriptors })),
       options: (t.options || []).map(({ id, label, hint, default: d }) =>
         ({ id, label, hint: hint || "", default: !!d })),
       actions: t.actions || [],
@@ -161,9 +169,10 @@ function manifestJson(base, { sites, themes }) {
     });
   }
   for (const t of themes) {
-    if (!t.files.length) continue;
+    const resources = [...t.files, ...t.fonts.map((f) => f.src)];
+    if (!resources.length) continue;
     war.push({
-      resources: t.files.map((f) => `${t.dir}/${f}`),
+      resources: resources.map((f) => `${t.dir}/${f}`),
       matches: sites.filter((s) => t.siteCss[s.id]).flatMap((s) => s.matches),
     });
   }

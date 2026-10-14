@@ -1012,10 +1012,19 @@ const GEM4_PAGE = (attrs, head) => `<!doctype html>
   chat-spark-toggle { display: flex; justify-content: center; margin-top: 12px; order: 1; }
   .gem-segmented-button-row-channel { position: relative; display: flex; }
   .gem-segmented-button-row-slider { position: absolute; inset: 0 50% 0 0; }
+  /* Material's list-item state layer, verbatim from the live page
+     (2026-10-13): it lives on the same ::before as the theme's hand. */
+  .mat-mdc-list-item-interactive::before { top: 0; left: 0; right: 0; bottom: 0; position: absolute; content: ""; opacity: 0; }
+  .mdc-list-item:not(.mdc-list-item--selected):focus::before { position: absolute; top: 0; left: 0; width: 100%; height: 100%; content: ""; }
+  side-navigation-content { display: block; width: 260px; }
+  gem-nav-list-item a { display: flex; height: 32px; align-items: center; }
 </style>
 ${head}
 </head>
 <body class="dark-theme">
+<side-navigation-content><gem-nav-list-item>
+  <a class="mat-mdc-list-item mdc-list-item mat-mdc-list-item-interactive gem-nav-list-item" href="/app" id="newchat"><span>New chat</span></a>
+</gem-nav-list-item></side-navigation-content>
 <main>
   <div id="zero"><input-container><div class="input-area-container is-zero-state" style="border-radius:28px">
     <input-area-v2><div class="input-area"><rich-textarea><div class="ql-editor"></div></rich-textarea></div></input-area-v2>
@@ -1031,6 +1040,9 @@ ${head}
 </main>
 <script>
 window.addEventListener("load", () => {
+  // A click leaves the row focused, which is when Material's state layer
+  // stretched the hand across it.
+  document.getElementById("newchat").focus();
   const cs = (sel, pseudo) => getComputedStyle(document.querySelector(sel), pseudo || null);
   const zero = cs("#zero .input-area-container");
   const frame = cs("#zero .input-area-container", "::before");
@@ -1054,6 +1066,8 @@ window.addEventListener("load", () => {
     tabFont: cs(".gem-segmented-button-action span").fontFamily,
     selected: cs(".gem-segmented-button-selected .gem-segmented-button-action span").color,
     other: cs("gem-segmented-button:not(.gem-segmented-button-selected) .gem-segmented-button-action span").color,
+    rowFocused: document.activeElement === document.getElementById("newchat"),
+    hand: (() => { const h = cs("#newchat", "::before"); return [h.width, h.height, h.left, h.top].join(" "); })(),
   };
   document.title = "PROBE:" + JSON.stringify(out);
 });
@@ -1082,6 +1096,8 @@ g4check("gem4 toggle", g4.toggleBorder === "2px" && g4.toggleFill.startsWith("li
   `Chat/Task is its own little menu window (${g4.toggleBorder}, ${g4.toggleFill}…)`);
 g4check("gem4 slider", g4.slider.startsWith("linear-gradient"), `the active-tab slider is the gold bar (${g4.slider}…)`);
 g4check("gem4 tab font", /Silkscreen/.test(g4.tabFont), `tab labels in the pixel face (${g4.tabFont})`);
+g4check("gem4 row hand", g4.rowFocused && g4.hand === "20px 18px -4px 16px",
+  `a clicked (focused) row keeps its small hand at the edge, not stretched by Material's state layer (${g4.hand})`);
 g4check("gem4 tab colours", g4.selected === "rgb(36, 28, 4)" && g4.other === "rgb(219, 228, 255)",
   `dark on gold when selected (${g4.selected}), menu text otherwise (${g4.other})`);
 console.log(bad

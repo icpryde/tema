@@ -85,7 +85,10 @@ const server = createServer({
 }, (req, res) => {
   const host = (req.headers.host || "").split(":")[0];
   if (req.url === "/" && PAGES[host]) {
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    // claude.ai's real policy refuses data: fonts (2026-10), which silently
+    // dropped the theme's embedded pixel fonts there. Serve the same rule.
+    const csp = host === "claude.ai" ? { "content-security-policy": "font-src 'self'" } : {};
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8", ...csp });
     res.end(PAGES[host]);
   } else {
     res.writeHead(404);
@@ -104,6 +107,16 @@ const check = (ok, label, detail = "") => {
 };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Poll rather than sleep: the site tabs sit behind the popup, and Chrome
+// aligns a background tab's timers to whole seconds, so how long the
+// engine's debounced pass takes to land varies run to run.
+async function until(read, ok, ms = 6000) {
+  const end = Date.now() + ms;
+  let v = await read();
+  while (!ok(v) && Date.now() < end) { await wait(150); v = await read(); }
+  return v;
+}
+
 const browser = await launch({
   binary,
   extPath: ROOT,
@@ -120,9 +133,12 @@ try {
   }
   await wait(500);
 
-  // fonts.load() rather than fonts.check(): a background tab that has not
-  // painted has not asked for the face yet, which check() reports as missing.
+  // Ask for the face, then look for one that LOADED: a background tab that
+  // has not painted has not requested it yet, and where the page refuses the
+  // stylesheet's data: copy that copy errors and load() rejects, while the
+  // engine's FontFace copy still carries the text.
   const state = (tab) => tab.eval(`(async () => {
+    try { await document.fonts.load('8px "FF Press Start"'); } catch { /* a refused copy */ }
     const root = document.documentElement;
     const composer = document.getElementById("composer");
     const cs = composer && getComputedStyle(composer);
@@ -132,7 +148,7 @@ try {
       party: document.querySelectorAll(".ff-party-member").length,
       reply: !!document.querySelector("#reply[data-tema-reply]"),
       border: cs ? cs.borderTopWidth + " " + cs.borderTopColor : null,
-      font: (await document.fonts.load('8px "FF Press Start"')).length > 0,
+      font: [...document.fonts].some((f) => f.family.replace(/"/g, "") === "FF Press Start" && f.status === "loaded"),
       choco: !!document.querySelector(".ff-choco-sky, .ff-choco-clip"),
     };
   })()`);
@@ -153,15 +169,14 @@ try {
 
   // Put the theme on all three sites from the popup.
   for (const site of ["claude", "chatgpt", "gemini"]) await click(pill(site));
-  await wait(900);
   for (const [site, tab] of Object.entries(tabs)) {
-    const s = await state(tab);
+    const s = await until(() => state(tab), (v) => v.party === 4 && v.reply && v.font);
     check(s.theme === "final-fantasy", `${site}: wears the theme after the popup click`, `data-tema=${s.theme}`);
     check(s.opts === "menu-sounds bottom-scenery", `${site}: default options stamped`, `data-tema-opt=${s.opts}`);
     check(s.party === 4, `${site}: the party is on the message box`, `${s.party} members`);
     check(s.reply, `${site}: the settled reply is framed (page signals)`);
     check(s.border === "2px rgb(255, 255, 255)", `${site}: the composer is a menu window`, s.border);
-    check(s.font, `${site}: the pixel font loaded`);
+    check(s.font, `${site}: the pixel font loaded${site === "claude" ? " (under claude.ai's no-data:-fonts policy)" : ""}`);
   }
   check(await popup.eval(`[...document.querySelectorAll('.wear')].every((w) => w.classList.contains('on'))`),
     "popup: every site shows the theme it wears");
@@ -169,16 +184,14 @@ try {
   // An option, from the card's settings.
   await click('.card[data-theme="final-fantasy"] .gear');
   await popup.eval(`(() => { const b = document.querySelector('.switch[data-opt="rich-text"]'); b.click(); })()`);
-  await wait(500);
   for (const [site, tab] of Object.entries(tabs)) {
-    const s = await state(tab);
+    const s = await until(() => state(tab), (v) => /rich-text/.test(v.opts || ""));
     check(/rich-text/.test(s.opts || ""), `${site}: an option turned on in the popup reaches the page`, `data-tema-opt=${s.opts}`);
   }
 
   // A popup button: the chocobo.
   await popup.eval(`[...document.querySelectorAll('.action-btn')].find((b) => b.textContent === "Parkour").click()`);
-  await wait(400);
-  check((await state(tabs.claude)).choco, "claude: the chocobo button sends one across the open tab");
+  check((await until(() => state(tabs.claude), (v) => v.choco)).choco, "claude: the chocobo button sends one across the open tab");
   if (SHOTS) {
     const h = await popup.eval("document.documentElement.scrollHeight");
     await writeFile(join(ROOT, "docs/screenshots/popup.png"), await popup.screenshot({ x: 0, y: 0, width: 372, height: h }));
@@ -187,8 +200,7 @@ try {
 
   // Take one site off; the others keep the theme.
   await click(pill("claude"));
-  await wait(600);
-  const off = await state(tabs.claude);
+  const off = await until(() => state(tabs.claude), (v) => v.theme === null && v.party === 0 && !v.reply);
   check(off.theme === null && off.party === 0 && !off.reply, "claude: off again, nothing left behind",
     `theme=${off.theme} party=${off.party} reply=${off.reply}`);
   check((await state(tabs.chatgpt)).theme === "final-fantasy", "chatgpt: unaffected by claude going off");

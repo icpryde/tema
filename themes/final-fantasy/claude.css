@@ -208,8 +208,13 @@ html[data-tema="final-fantasy"] .font-title {
    the line grows with the name and the greeting wording. Measured against the
    672px column — "Happy Wednesday, Christopher" is 462px at the 24px ceiling,
    which also leaves the party sprites room to sit beside it. */
+/* The 2026-10 build moved it again: the text is span[data-new-page-
+   greeting-text] inside a .font-ui-serif block. The data attribute is the
+   hook now; the old class stays for builds that still have it. */
 html[data-tema="final-fantasy"] .font-display,
-html[data-tema="final-fantasy"] .font-display * {
+html[data-tema="final-fantasy"] .font-display *,
+html[data-tema="final-fantasy"] div:has(> [data-new-page-greeting-text]),
+html[data-tema="final-fantasy"] [data-new-page-greeting-text] {
   font-family: var(--ff-pixel) !important;
   font-size: clamp(0.95rem, 2.6vw, 1.5rem) !important;
   line-height: 1.7 !important;
@@ -532,17 +537,18 @@ html[data-tema="final-fantasy"] a[data-row-main-button] {
 /* The select hand that tracks the highlighted menu row. Points right, at the
    row it's selecting — the same way it works in the games. */
 html[data-tema="final-fantasy"] a[data-row-main-button]::before {
-  content: "";
-  position: absolute;
-  /* Clear of the label: the hand is ~19px wide and the row's text starts at
-     14px, so anything less than about -6 overlaps the first character. */
-  left: -6px;
-  top: 50%;
-  /* Derived, not hardcoded: the generated hand is 18px tall, so a fixed
-     -7px (right for 14px) left it 2px high. */
-  margin-top: calc(var(--ff-art-cursor-h) * -0.5px);
-  height: calc(var(--ff-art-cursor-h) * 1px);
-  width: calc(var(--ff-art-cursor-w) * 1px);
+  /* Geometry pinned !important: a row's ::before is the kind of box a
+     site's own state layer claims on focus (Gemini's Material rows stretched
+     it to the whole row after a click, and the hand swelled across the
+     label). Left -6px keeps it clear of the label: the hand is ~19px wide
+     and the row's text starts at 14px. The top margin is derived from the
+     generated hand's height (18px), not hardcoded. */
+  content: "" !important;
+  position: absolute !important;
+  inset: 50% auto auto -6px !important;
+  margin: calc(var(--ff-art-cursor-h) * -0.5px) 0 0 0 !important;
+  height: calc(var(--ff-art-cursor-h) * 1px) !important;
+  width: calc(var(--ff-art-cursor-w) * 1px) !important;
   background: var(--ff-art-cursor) center / contain no-repeat;
   image-rendering: pixelated;
   opacity: 0;
@@ -804,6 +810,54 @@ html[data-tema="final-fantasy"] .dframe-sidebar-body .contents > button[data-row
 html[data-tema="final-fantasy"] .dframe-sidebar-body .contents > button[data-row-main-button]:nth-of-type(3) .df-leading-slot::after { background-image: var(--ff-art-shop-nav-artifacts); }   /* Artifacts — blue-hood head from shop-items.png */
 html[data-tema="final-fantasy"] .dframe-sidebar-body .contents > button[data-row-main-button]:nth-of-type(4) .df-leading-slot::after { background-image: var(--ff-art-nav-4); }   /* Scheduled */
 html[data-tema="final-fantasy"] .dframe-sidebar-body .contents > button[data-row-main-button]:nth-of-type(5) .df-leading-slot::after { background-image: var(--ff-art-nav-5); }   /* Customize */
+
+/* The 2026-10 "hub rail" sidebar: Search and New sit at the top, and
+   Projects, Artifacts, Scheduled, Customize and More are rows in
+   [data-testid="nav-pin-rows"], each keyed by data-nav-item, so the icons
+   key on names rather than positions now. New is the row whose leading slot
+   holds .df-new-circle. More is a button, which the positional rule above
+   takes for New and gives the coin, at a higher specificity; the icons here
+   are !important so the names always win. The stock glyphs
+   are hidden by opacity (their slot's size is load-bearing), which also
+   hides the page signals' icon stamps inside them. */
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item] .df-leading-slot,
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-row-main-button] .df-leading-slot:has(> .df-new-circle) {
+  position: relative;
+}
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item] .df-leading-slot > *,
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-row-main-button] .df-leading-slot:has(> .df-new-circle) > * {
+  opacity: 0 !important;
+}
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item] .df-leading-slot::after,
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-row-main-button] .df-leading-slot:has(> .df-new-circle)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-row-main-button] .df-leading-slot:has(> .df-new-circle)::after { background-image: var(--ff-art-nav-0) !important; }
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item="projects"] .df-leading-slot::after { background-image: var(--ff-art-nav-2) !important; }
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item^="artifacts"] .df-leading-slot::after { background-image: var(--ff-art-shop-nav-artifacts) !important; }
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item="scheduled"] .df-leading-slot::after { background-image: var(--ff-art-nav-4) !important; }
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item="customize"] .df-leading-slot::after { background-image: var(--ff-art-nav-5) !important; }
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-nav-item="more"] .df-leading-slot::after { background-image: var(--ff-art-shop-nav-more) !important; }
+
+/* The nav rows are one menu window again, as the block above was. */
+html[data-tema="final-fantasy"] [data-testid="sidebar"] [data-testid="nav-pin-rows"] {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 6px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  padding: 3px !important;
+  margin: 2px 0 6px !important;
+}
 
 /* ------------------------------------------------------- bottom tray */
 
@@ -1290,8 +1344,8 @@ html[data-tema="final-fantasy"] .dframe-root[data-frame-mode="code"] .dframe-sid
    exists on the empty view). Clicks and chocobo falls still override via
    data-pose, so every animation works unchanged; they simply return to the
    kneel instead of the stand while the greeting is up. */
-html[data-tema="final-fantasy"]:has(.font-display) .ff-party-member[data-member="0"][data-pose="idle"],
-html[data-tema="final-fantasy"]:has(.font-display) .ff-party-member[data-member="1"][data-pose="idle"] {
+html[data-tema="final-fantasy"]:has(.font-display, [data-new-page-greeting-text]) .ff-party-member[data-member="0"][data-pose="idle"],
+html[data-tema="final-fantasy"]:has(.font-display, [data-new-page-greeting-text]) .ff-party-member[data-member="1"][data-pose="idle"] {
   animation: none !important;
   background-position-x: calc(4 / (var(--ff-art-party-poses) - 1) * 100%);
 }

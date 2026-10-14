@@ -46,6 +46,7 @@ export async function packageFiles() {
     if (t.script) add(t.script);
     if (t.card) for (const f of [t.card.html, t.card.css]) if (f) add(f);
     for (const f of [].concat(t.ship || [])) add(f);
+    for (const f of t.fonts) add(f.src);
     for (const pattern of t.files) {
       // Patterns are "dir/*.ext"; expand against the disk.
       const dir = join(ROOT, t.dir, dirname(pattern));

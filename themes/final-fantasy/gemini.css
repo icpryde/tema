@@ -663,6 +663,30 @@ html[data-tema="final-fantasy"] model-response[data-tema-reply] .response-contai
   position: relative;
 }
 
+/* Gemini 4's "extended and XL grid" layout (2026-10, on chat-window-content
+   as .enable-extended-and-xl-grid): the conversation spans the whole chat
+   area and each block of a reply centres itself in a 708px column (code and
+   images 740px; tables, product lists, mini-apps and bento layouts run
+   wider, up to the full width). The window follows the column rather than
+   the full width, and keeps the full width only for a reply holding one of
+   the wide blocks, so those still sit inside it. 58px is the window's own
+   padding (40 + 14) and border (2 x 2). left: -13px recentres the text
+   (the crystal's gutter makes the padding lopsided), so the reply lines up
+   with the user bubbles and the action row, which share the column. */
+html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response[data-tema-reply] .response-container-content {
+  box-sizing: border-box;
+  max-width: calc(var(--bard-chat-window-content-width-default, 708px) + 58px);
+  margin-inline: auto !important;
+  left: -13px;
+}
+html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response[data-tema-reply] .response-container-content:has(code-block, single-image, image-carousel, generated-video, deep-zoom) {
+  max-width: calc(740px + 58px);
+}
+html[data-tema="final-fantasy"] .enable-extended-and-xl-grid model-response[data-tema-reply] .response-container-content:has(table-block, compare-table, product-list, mini-app, .flex-container-root, table) {
+  max-width: none;
+  left: 0;
+}
+
 /* Crystal in the window's left gutter — the speaker mark. Width derives from
    the ripped asset's own aspect so a re-rip never squashes it. */
 @keyframes ff-crystal-pulse {
@@ -922,6 +946,92 @@ html[data-tema="final-fantasy"] chat-spark-toggle .gem-segmented-button-selected
   color: #241c04 !important;
 }
 
+/* Task mode (Gemini 4, 2026-10) lists suggestions under the composer:
+   zero-state-block-picker > suggestion-block > .suggestion-block-container
+   > suggestion > .suggestion-container > button.card-button (icon + text)
+   and a dismiss button. Stock draws them as faint text on the page; here
+   they are a command menu: one window, a pixel-font row per suggestion,
+   gold and the select hand on hover. The hand gets its own gutter (the
+   button's left padding grows), so it never sits on the row's icon. */
+html[data-tema="final-fantasy"] suggestion-block .suggestion-block-container {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: var(--ff-frame-shadow) !important;
+  padding: 4px 0 !important;
+}
+html[data-tema="final-fantasy"] suggestion .suggestion-container {
+  position: relative;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+html[data-tema="final-fantasy"] suggestion .suggestion-container:hover {
+  background: rgba(255, 215, 94, 0.1) !important;
+}
+html[data-tema="final-fantasy"] suggestion .card-button {
+  background: transparent !important;
+  padding-left: 32px !important;
+}
+html[data-tema="final-fantasy"] suggestion .card-button,
+html[data-tema="final-fantasy"] suggestion .card-button :not(mat-icon) {
+  font-family: var(--ff-pixel-ui) !important;
+  color: #dbe4ff !important;
+}
+html[data-tema="final-fantasy"] suggestion .card-text {
+  font-size: 0.8125rem !important;
+  letter-spacing: 0.02em;
+}
+html[data-tema="final-fantasy"] suggestion .card-button mat-icon {
+  color: var(--ff-crystal-cyan) !important;
+}
+html[data-tema="final-fantasy"] suggestion .suggestion-container:hover .card-button,
+html[data-tema="final-fantasy"] suggestion .suggestion-container:hover .card-button :not(mat-icon),
+html[data-tema="final-fantasy"] suggestion .suggestion-container:hover .card-button mat-icon {
+  color: var(--ff-gold) !important;
+}
+html[data-tema="final-fantasy"] suggestion .suggestion-container::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  margin-top: calc(var(--ff-art-cursor-h) * -0.5px);
+  height: calc(var(--ff-art-cursor-h) * 1px);
+  width: calc(var(--ff-art-cursor-w) * 1px);
+  background: var(--ff-art-cursor) center / contain no-repeat;
+  image-rendering: pixelated;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+html[data-tema="final-fantasy"] suggestion .suggestion-container:hover::before {
+  opacity: 1;
+  animation: ff-cursor-blink 0.9s steps(1) infinite;
+}
+html[data-tema="final-fantasy"] suggestion .dismiss-suggestion-button {
+  color: rgba(219, 228, 255, 0.55) !important;
+  background: transparent !important;
+}
+html[data-tema="final-fantasy"] suggestion .dismiss-suggestion-button:hover {
+  color: var(--ff-gold) !important;
+}
+
+/* The "Scroll to bottom" button Gemini floats over the composer
+   (input-container > back-to-bottom-fab): a stock dark disc, now a small
+   menu-window button. */
+html[data-tema="final-fantasy"] back-to-bottom-fab button {
+  background: var(--ff-window) !important;
+  border: 2px solid var(--ff-frame) !important;
+  border-radius: 7px !important;
+  box-shadow: inset 0 0 0 1px var(--ff-bevel), 0 2px 0 var(--ff-drop) !important;
+  color: #dbe4ff !important;
+}
+html[data-tema="final-fantasy"] back-to-bottom-fab button mat-icon {
+  color: inherit !important;
+}
+html[data-tema="final-fantasy"] back-to-bottom-fab button:hover {
+  color: var(--ff-gold) !important;
+}
+
 /* Composer control chips: plus/toolbox, mode pill, mic, stop. Cosmetic
    only — but sized to ONE height so the row reads as a matched set (the
    stock buttons come in three different sizes, which looked ragged next
@@ -1170,14 +1280,19 @@ html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook"] {
   overflow: visible !important;
 }
 
+/* The rows' ::before is ALSO Material's state layer. Once a row is clicked,
+   `.mdc-list-item:not(.mdc-list-item--selected):focus::before` (three
+   classes, out-ranking this rule) sets it to 100% x 100% at 0/0, and the
+   hand, drawn `contain`, swelled to the row's height across the middle of
+   the label (Gemini 4, 2026-10). Its geometry is pinned !important so no
+   state rule can move or stretch it. */
 html[data-tema="final-fantasy"] side-navigation-content a:not([href^="http"])::before {
-  content: "";
-  position: absolute;
-  left: -4px;
-  top: 50%;
-  margin-top: calc(var(--ff-art-cursor-h) * -0.5px);
-  height: calc(var(--ff-art-cursor-h) * 1px);
-  width: calc(var(--ff-art-cursor-w) * 1px);
+  content: "" !important;
+  position: absolute !important;
+  inset: 50% auto auto -4px !important;
+  margin: calc(var(--ff-art-cursor-h) * -0.5px) 0 0 0 !important;
+  height: calc(var(--ff-art-cursor-h) * 1px) !important;
+  width: calc(var(--ff-art-cursor-w) * 1px) !important;
   background: var(--ff-art-cursor) center / contain no-repeat;
   image-rendering: pixelated;
   opacity: 0;
@@ -1253,7 +1368,10 @@ html[data-tema="final-fantasy"] side-navigation-content a[href="library"] mat-ic
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/gems"] mat-icon,
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/create"] mat-icon,
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook/"] mat-icon,
-html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon {
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/scheduled"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/customize"] mat-icon,
+html[data-tema="final-fantasy"] side-navigation-content gem-nav-list-item > button mat-icon[fonticon="more_horiz"] {
   position: relative;
   color: transparent !important;
 }
@@ -1267,7 +1385,10 @@ html[data-tema="final-fantasy"] side-navigation-content a[href="library"] mat-ic
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/gems"] mat-icon::after,
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/create"] mat-icon::after,
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook/"] mat-icon::after,
-html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon::after {
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/scheduled"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/customize"] mat-icon::after,
+html[data-tema="final-fantasy"] side-navigation-content gem-nav-list-item > button mat-icon[fonticon="more_horiz"]::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -1295,6 +1416,14 @@ html[data-tema="final-fantasy"] side-navigation-content a[href^="/gems"] mat-ico
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/create"] mat-icon::after { background-image: var(--ff-art-nav-3); }
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebook/"] mat-icon::after { background-image: var(--ff-art-nav-2); }
 html[data-tema="final-fantasy"] side-navigation-content a[href^="/notebooks/view"] mat-icon::after { background-image: var(--ff-art-nav-5); }
+
+/* Gemini 4 (2026-10) added Scheduled, Customise and a More button to the top
+   group. Scheduled takes the clock (as on claude.ai), Customise the paint
+   palette, and More the frog that marks More on ChatGPT. More is keyed on
+   its icon, not its label, which is translated. */
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/scheduled"] mat-icon::after { background-image: var(--ff-art-nav-4); }
+html[data-tema="final-fantasy"] side-navigation-content a[href^="/customize"] mat-icon::after { background-image: var(--ff-art-tray-1); }
+html[data-tema="final-fantasy"] side-navigation-content gem-nav-list-item > button mat-icon[fonticon="more_horiz"]::after { background-image: var(--ff-art-shop-nav-more); }
 
 /* Recent chats (a[href^="/app/<id>"] — note the trailing path segment, which
    "/app" itself lacks) read as the party's equipment: the same eight icons
@@ -1702,6 +1831,7 @@ html[data-tema="final-fantasy"] .ff-choco-c {
   html[data-tema="final-fantasy"] .ff-shooting-star,
   html[data-tema="final-fantasy"] model-response[data-tema-working] .response-container::after,
   html[data-tema="final-fantasy"] side-navigation-content a:not([href^="http"]):hover::before,
+  html[data-tema="final-fantasy"] suggestion .suggestion-container:hover::before,
   html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item.is-active,
   html[data-tema="final-fantasy"] side-navigation-content a.gem-nav-list-item[aria-current="page"] {
     animation: none !important;

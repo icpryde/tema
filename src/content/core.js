@@ -106,6 +106,7 @@
       for (const p of [...current.parts].reverse()) call(p, "stop");
       current = null;
       observe(false);
+      unloadFonts();
     }
     if (!theme) return;
 
@@ -121,7 +122,44 @@
     current = { theme, ctx, parts };
     for (const p of parts) call(p, "start", ctx);
     observe(true);
+    loadFonts(theme);
     schedule();
+  }
+
+  /* --------------------------------------------------------------- fonts */
+
+  // A theme can ship its fonts as @font-face data URIs in its stylesheets,
+  // which draw from the first paint, but a page's own security policy can
+  // refuse data: fonts (claude.ai's font-src does, 2026-10). So the engine
+  // also adds the packaged files through the FontFace API: built from bytes
+  // the extension fetched itself, they load no URL the page could veto.
+  // Wherever both copies work they're the same face; where the stylesheet's
+  // fails, this one carries the theme.
+  const fontCache = new Map();   // theme id -> Promise<FontFace[]>
+  let fontsAdded = [];
+
+  function loadFonts(theme) {
+    if (!theme.fonts || !theme.fonts.length || typeof FontFace !== "function" || !document.fonts) return;
+    let faces = fontCache.get(theme.id);
+    if (!faces) {
+      faces = Promise.all(theme.fonts.map(async (f) => {
+        const res = await fetch(api.runtime.getURL(f.src));
+        if (!res.ok) throw new Error(f.src + " " + res.status);
+        const face = new FontFace(f.family, await res.arrayBuffer(), f.descriptors || {});
+        return face.load();
+      })).catch(() => []);
+      fontCache.set(theme.id, faces);
+    }
+    faces.then((list) => {
+      if (!current || current.theme.id !== theme.id || fontsAdded.length) return;
+      for (const face of list) document.fonts.add(face);
+      fontsAdded = list;
+    });
+  }
+
+  function unloadFonts() {
+    for (const face of fontsAdded) document.fonts.delete(face);
+    fontsAdded = [];
   }
 
   function shutdown() {
@@ -130,6 +168,7 @@
       for (const p of [...current.parts].reverse()) call(p, "stop");
       current = null;
     }
+    unloadFonts();
     observe(false);
     guard.disconnect();
     ROOT.removeAttribute(THEME_ATTR);

@@ -27,8 +27,12 @@
   ],
   "script": "runtime.js",
   "signals": ["replies", "working", "icons", "wide-tables"],
+  "fonts": [
+    { "family": "FF Press Start", "src": "assets/fonts/PressStart2P.woff2" },
+    { "family": "FF Silkscreen", "src": "assets/fonts/Silkscreen.woff2" }
+  ],
   "files": ["assets/sounds/*.wav"],
-  "ship": ["assets/OFL.txt"],
+  "ship": ["assets/fonts/OFL.txt"],
   "card": { "html": "card.html", "css": "card.css" },
 
   "options": [

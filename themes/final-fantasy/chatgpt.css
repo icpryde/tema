@@ -1349,14 +1349,16 @@ html[data-tema="final-fantasy"] #app-shell-sidebar [role="listitem"] > .overflow
   overflow: visible !important;
 }
 
+/* Geometry pinned !important: a row's ::before is the kind of box a site's
+   own state layer claims on focus (Gemini's Material rows stretched it to
+   the whole row after a click, and the hand swelled across the label). */
 html[data-tema="final-fantasy"] #app-shell-sidebar :is(button, [role="group"], [role="button"]).sidebar-item::before {
-  content: "";
-  position: absolute;
-  left: -6px;
-  top: 50%;
-  margin-top: calc(var(--ff-art-cursor-h) * -0.5px);
-  height: calc(var(--ff-art-cursor-h) * 1px);
-  width: calc(var(--ff-art-cursor-w) * 1px);
+  content: "" !important;
+  position: absolute !important;
+  inset: 50% auto auto -6px !important;
+  margin: calc(var(--ff-art-cursor-h) * -0.5px) 0 0 0 !important;
+  height: calc(var(--ff-art-cursor-h) * 1px) !important;
+  width: calc(var(--ff-art-cursor-w) * 1px) !important;
   background: var(--ff-art-cursor) center / contain no-repeat;
   image-rendering: pixelated;
   opacity: 0;
@@ -1417,7 +1419,16 @@ html[data-tema="final-fantasy"] #app-shell-sidebar [data-app-action-sidebar-proj
 
 html[data-tema="final-fantasy"] #app-shell-sidebar nav[role="navigation"] > :first-child [data-appearance] button .icon-leading-slot::after,
 html[data-tema="final-fantasy"] #app-shell-sidebar nav[data-app-navigation-rail] button[aria-label="New chat"] .icon-leading-slot::after { background-image: var(--ff-art-nav-0); }
+/* Every destination's stock glyph is hidden above, so one the theme has no
+   sprite for would show an empty slot (Codex did, 2026-10): the star stands
+   in for any destination without its own. */
+html[data-tema="final-fantasy"] #app-shell-sidebar button[data-sidebar-destination] .icon-leading-slot::after { background-image: var(--ff-art-shop-icon-star); }
 html[data-tema="final-fantasy"] #app-shell-sidebar button[data-sidebar-destination="builtin:library"] .icon-leading-slot::after { background-image: var(--ff-art-nav-2); }
+html[data-tema="final-fantasy"] #app-shell-sidebar button[data-sidebar-destination="builtin:codex"] .icon-leading-slot::after { background-image: var(--ff-art-nav-3); }
+/* Images sits in the first group with New chat, whose rule would hand it New
+   chat's coin; the brush, as on Gemini. */
+html[data-tema="final-fantasy"] #app-shell-sidebar nav[role="navigation"] > :first-child [data-appearance] button[data-sidebar-destination="builtin:images"] .icon-leading-slot::after,
+html[data-tema="final-fantasy"] #app-shell-sidebar button[data-sidebar-destination="builtin:images"] .icon-leading-slot::after { background-image: var(--ff-art-tray-0); }
 html[data-tema="final-fantasy"] #app-shell-sidebar button[data-sidebar-destination="builtin:automations"] .icon-leading-slot::after { background-image: var(--ff-art-nav-4); }
 html[data-tema="final-fantasy"] #app-shell-sidebar button[data-sidebar-destination="builtin:skills"] .icon-leading-slot::after { background-image: var(--ff-art-shop-icon-bolt); }
 html[data-tema="final-fantasy"] #app-shell-sidebar [data-appearance]:has(> button[data-sidebar-destination]) > button[aria-haspopup="menu"] .icon-leading-slot::after { background-image: var(--ff-art-shop-nav-more); }
